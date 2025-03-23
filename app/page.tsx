@@ -1,103 +1,164 @@
-import Image from "next/image";
+"use client"
+
+import { useState } from 'react'
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+
+import { AlertCircle } from "lucide-react"
+
+import ImageUploader from '@/components/image-uploader'
+import ImagePreview from '@/components/image-priview'
+import Description, { formatDescription } from '@/components/description'
+import Loader from '@/components/loader'
+import { analyzeImageWithGemini, askFollowUpQuestion, resetAnalysisContext } from './api/analyzeImage'
+import ChatHeader from '@/components/ chart-header'
+import { Input } from '@/components/ui/input'
+import Sidebar from '@/components/sidebar'
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [imageUrl, setImageUrl] = useState<string>('')
+  const [description, setDescription] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string>('')
+  const [question, setQuestion] = useState<string>('')
+  const [followUpResponses, setFollowUpResponses] = useState<Array<{question: string, answer: string}>>([])
+  const [isFollowUpMode, setIsFollowUpMode] = useState<boolean>(false)
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  const handleImageSelected = async (file: File) => {
+    setImageUrl(URL.createObjectURL(file))
+    setDescription('')
+    setError('')
+    setLoading(true)
+    setFollowUpResponses([])
+    setIsFollowUpMode(false)
+  
+    try {
+      // Reset any previous context
+      resetAnalysisContext();
+      
+      const description = await analyzeImageWithGemini(file);
+      setDescription(description);
+      setIsFollowUpMode(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred')
+    } finally {
+      setLoading(false)
+    }
+  }
+  
+  const handleQuestionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!question.trim()) return;
+    
+    setLoading(true);
+    setError('');
+    
+    try {
+      const answer = await askFollowUpQuestion(question);
+      setFollowUpResponses(prev => [...prev, {question, answer}]);
+      setQuestion('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to process your question');
+    } finally {
+      setLoading(false);
+    }
+  }
+  
+  const handleReset = () => {
+    setImageUrl('');
+    setDescription('');
+    setError('');
+    setQuestion('');
+    setFollowUpResponses([]);
+    setIsFollowUpMode(false);
+    resetAnalysisContext();
+  }
+
+  function formatResponse(text: string) {
+    return text
+        .replace(/\*\*/g, '') // Remove bold markers
+        .replace(/"\b(.*?)\b"/g, '$1') // Remove quotes around text
+        .replace(/\* /g, '') // Remove leading stars in lists
+        .replace(/\n/g, '<br>'); // Convert new lines to HTML line breaks
+}
+  return (
+    <div className="flex h-screen bg-background overflow-hidden">
+      <Sidebar />
+      <div className="flex flex-col flex-1 h-full overflow-hidden">
+        <ChatHeader />
+        <main className="flex-1 overflow-auto py-4">
+          <div className="max-w-3xl mx-auto px-4 space-y-6">
+            {(!imageUrl && !description) && (
+              <div className="flex flex-col items-center justify-center py-20">
+                <h1 className="text-3xl font-semibold mb-4">AI Image Analysis</h1>
+                <p className="text-muted-foreground text-center max-w-md mb-8">
+                  Upload an image to get an AI-generated description. Our advanced AI will analyze your image and provide detailed information.
+                </p>
+                <ImageUploader onImageSelected={handleImageSelected} />
+              </div>
+            )}
+
+            {imageUrl && (
+              <>
+                <div className="flex items-center justify-between">
+                  <ImageUploader onImageSelected={handleImageSelected} />
+                  <Button 
+                    variant="outline" 
+                    onClick={handleReset}
+                    className="ml-2"
+                  >
+                    Reset
+                  </Button>
+                </div>
+                
+                {loading && <Loader />}
+                
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+                
+                <ImagePreview imageUrl={imageUrl} />
+                <Description description={description} />
+                
+                {isFollowUpMode && description && (
+                  <div className="mt-8 border rounded-lg p-4">
+                    <h2 className="text-xl font-medium mb-4">Ask for more details</h2>
+                    <form onSubmit={handleQuestionSubmit} className="flex gap-2">
+                      <Input
+                        placeholder="Ask a question about this image..."
+                        value={question}
+                        onChange={(e:any) => setQuestion(e.target.value)}
+                        disabled={loading}
+                        className="flex-1"
+                      />
+                      <Button className='border bg-[#000] text-white' type="submit" disabled={loading || !question.trim()}>
+                        Ask
+                      </Button>
+                    </form>
+                    
+                    {followUpResponses.length > 0 && (
+                      <div className="mt-6 space-y-4">
+                        {followUpResponses.map((item, index) => (
+                          <div key={index} className="border rounded-md p-4">
+                            <div className="font-medium text-primary">Q: {item.question}</div>
+                            <div className="mt-2" dangerouslySetInnerHTML={{ __html: formatDescription(item.answer) }} />
+                             <div  />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </main>
+      </div>
     </div>
-  );
+  )
 }
