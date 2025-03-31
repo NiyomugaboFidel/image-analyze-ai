@@ -87,14 +87,12 @@ export default function Home() {
       <Sidebar />
       <div className="flex flex-col flex-1 h-full overflow-hidden">
         <ChatHeader />
-        <main className="flex-1 overflow-auto py-4">
+        <main className="flex-1 overflow-auto py-4 w-full">
           <div className="max-w-3xl mx-auto px-4 space-y-6">
             {(!imageUrl && !description) && (
               <div className="flex flex-col items-center justify-center py-20">
-                <h1 className="text-3xl font-semibold mb-4">AI Image Analysis</h1>
-                <p className="text-muted-foreground text-center max-w-md mb-8">
-                  Upload an image to get an AI-generated description. Our advanced AI will analyze your image and provide detailed information.
-                </p>
+                <h1 className="text-3xl font-semibold mb-4">VICKY AI</h1>
+        
                 <ImageUploader onImageSelected={handleImageSelected} />
               </div>
             )}
@@ -103,13 +101,13 @@ export default function Home() {
               <>
                 <div className="flex items-center justify-between">
                   <ImageUploader onImageSelected={handleImageSelected} />
-                  <Button 
+                  {/* <Button 
                     variant="outline" 
                     onClick={handleReset}
                     className="ml-2"
                   >
                     Reset
-                  </Button>
+                  </Button> */}
                 </div>
                 
                 {loading && <Loader />}

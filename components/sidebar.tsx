@@ -12,7 +12,7 @@ const Sidebar: FC = () => {
 <div className='w-5 md:w-15'>
 <div className={cn(
       "h-full flex flex-col bg-white dark:bg-black fixed z-50 shadow-lg transition-all",
-      isExpanded ? "w-64" : "w-5"
+      isExpanded ? "w-64" : "w-[0px]"
     )}>
       {/* Sidebar Header */}
       <div className="p-4 flex items-center justify-center ">

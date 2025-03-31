@@ -62,12 +62,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected }) => {
             setCameraReady(true)
           }
           
-          // // Fix for the TypeScript error - properly type the event
-          // videoRef.current.onerror = (event: Event) => {
-          //   const target = event.target as HTMLVideoElement;
-          //   console.error("Video error:", event)
-          //   setErrorMessage("Error initializing video: " + (target.error?.message || "Unknown error"))
-          // }
+  
           
           videoRef.current.play().catch(err => {
             console.error("Error playing video:", err)
@@ -253,8 +248,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected }) => {
                 <p className="text-lg font-medium text-primary">Drop the image here...</p>
               ) : (
                 <>
-                  <p className="text-lg font-medium">Drag & drop an image here</p>
-                  <p className="text-sm text-gray-500">Or click to browse files</p>
+  
                   <div className="flex justify-center gap-2 mt-4">
                     <Button type="button" variant="outline" size="sm">
                       Select Image

@@ -1,44 +1,36 @@
-"use client"
+"use client";
 
-import { Progress } from "@/components/ui/progress"
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
+import { Card } from "@/components/ui/card";
+import { motion } from "framer-motion";
 
 interface LoaderProps {
-  showProgress?: boolean
+  showProgress?: boolean;
 }
 
 const Loader: React.FC<LoaderProps> = ({ showProgress = true }) => {
-  const [progress, setProgress] = useState(10)
+  const [progress, setProgress] = useState(50);
 
   useEffect(() => {
-    const timer1 = setTimeout(() => setProgress(30), 300)
-    const timer2 = setTimeout(() => setProgress(60), 800)
-    const timer3 = setTimeout(() => setProgress(85), 1500)
-    
-    return () => {
-      clearTimeout(timer1)
-      clearTimeout(timer2)
-      clearTimeout(timer3)
-    }
-  }, [])
+    const interval = setInterval(() => {
+      setProgress((prev) => (prev < 100 ? prev + Math.random() * 10 : 100));
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <Card className="py-4 px-6">
-      <div className="flex flex-col items-center justify-center w-full gap-2">
-        {showProgress ? (
-          <>
-            <Progress value={progress} className="w-full max-w-md" />
-            <p className="text-sm text-muted-foreground">Analyzing image...</p>
-          </>
-        ) : (
-          <div className="h-4 w-4 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-        )}
+        <Card className="py-6 px-8 flex flex justify-center items-center gap-4 w-full max-w-sm shadow-lg rounded-2xl">
+      <div className="w-full h-2 bg-gray-300 rounded-full overflow-hidden">
+        <motion.div
+          className="h-full bg-blue-500 rounded-full"
+          initial={{ width: "50%" }}
+          animate={{ width: `${progress}%` }}
+          transition={{ ease: "linear", duration: 0.5 }}
+        />
       </div>
     </Card>
-  )
-}
 
-export default Loader
+  );
+};
 
-// Missing import
-import { Card } from "@/components/ui/card"
+export default Loader;
