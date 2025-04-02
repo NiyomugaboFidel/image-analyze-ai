@@ -84,9 +84,9 @@ export default function Home() {
 }
   return (
     <div className="flex h-screen bg-background overflow-hidden">
-      <Sidebar />
+      {/* <Sidebar /> */}
       <div className="flex flex-col flex-1 h-full overflow-hidden">
-        <ChatHeader />
+        {/* <ChatHeader /> */}
         <main className="flex-1 overflow-auto py-4 w-full">
           <div className="max-w-3xl mx-auto px-4 space-y-6">
             {(!imageUrl && !description) && (
