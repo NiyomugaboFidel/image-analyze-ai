@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Bell, Calendar as CalendarIcon, Filter, MoreVertical, Search, AlertTriangle, HardHat, ArrowDown, FireExtinguisher } from 'lucide-react';
-import { BarChartCard } from '../components/BarChartCard';
-import { AreaChartCard } from '../components/AreaChartCard';
+import { BarChartCard } from '../../components/BarChartCard';
+import { AreaChartCard } from '../../components/AreaChartCard';
 import { hazardData, HazardDataTable } from './HazardTableData';
 
 // Define TypeScript interfaces for our data structures

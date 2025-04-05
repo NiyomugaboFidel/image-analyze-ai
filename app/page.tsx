@@ -11,9 +11,7 @@ import ImagePreview from '@/components/image-priview'
 import Description, { formatDescription } from '@/components/description'
 import Loader from '@/components/loader'
 import { analyzeImageWithGemini, askFollowUpQuestion, resetAnalysisContext } from './api/analyzeImage'
-import ChatHeader from '@/components/ chart-header'
 import { Input } from '@/components/ui/input'
-import Sidebar from '@/components/sidebar'
 
 export default function Home() {
   const [imageUrl, setImageUrl] = useState<string>('')

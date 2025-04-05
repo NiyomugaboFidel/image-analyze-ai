@@ -1,10 +1,10 @@
 // app/page.tsx
+import { CameraCard } from '@/app/components/CameraCard';
+import { Header } from '@/app/components/Header';
+import RecentChatsComponent from '@/app/components/RecentsCard';
+import CameraMonitoringSystem from '@/app/components/VideoPlayer';
+import { ChatProvider } from '@/app/context/ChatContext';
 import React from 'react';
-import { Header } from '../components/Header';
-import { CameraCard } from '../components/CameraCard';
-import RecentChats from '../components/RecentsCard';
-import ConstructionMonitoringSystem from '../components/VideoPlayer';
-import { ChatProvider } from '../context/ChatContext';
 
 
 
@@ -24,11 +24,11 @@ export default function Home() {
         <div className="col-span-12 lg:col-span-3 space-y-6">
           
           <CameraCard />
-          <RecentChats />
+          <RecentChatsComponent />
         </div>
         
         <div className="col-span-12 lg:col-span-9 p-4">
-          <ConstructionMonitoringSystem/>
+          <CameraMonitoringSystem/>
         </div>
             
       

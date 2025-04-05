@@ -25,6 +25,7 @@ import {
   LayoutDashboard,
   Bell
 } from 'lucide-react';
+import { User } from '@/app/types';
 
 type NavItem = {
   icon: React.ReactNode;
@@ -35,11 +36,7 @@ type NavItem = {
 
 type SidebarProps = {
   className?: string;
-  userProfile?: {
-    name: string;
-    avatar: string;
-    initials: string;
-  };
+  userProfile?: User
 };
 
 export function Sidebar({ className, userProfile }: SidebarProps) {
@@ -120,8 +117,8 @@ export function Sidebar({ className, userProfile }: SidebarProps) {
         {userProfile && (
           <div className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={userProfile.avatar} alt={userProfile.name} />
-              <AvatarFallback>{userProfile.initials}</AvatarFallback>
+              <AvatarImage src={userProfile.avatarUrl} alt={userProfile.name} />
+              <AvatarFallback>{userProfile.name}</AvatarFallback>
             </Avatar>
             <div className="hidden group-hover:block transition-all">
               <p className="text-sm font-medium">{userProfile.name}</p>

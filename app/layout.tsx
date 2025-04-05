@@ -3,11 +3,8 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
-import ChatHeader from '@/components/ chart-header'
-import { Sidebar } from './components/layout/Sidebar'
 import { Toaster } from "sonner";
-import { CameraProvider } from './context/CameraContextProvider'
- 
+import { AuthProvider } from './context/AuthoContext'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
@@ -45,32 +42,32 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const userProfile = {
-    name: 'John Doe',
-    avatar: '/avatar.png',
-    initials: 'JD',
-  };
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
+
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
-          <CameraProvider>
-          <ChatHeader />
+          <AuthProvider>
+
+
+     
+       
         
-          <div className="flex h-screen bg-gray-50">
-          <Sidebar userProfile={userProfile} />
-          <main className="flex-1 overflow-auto p-4">
+          <main>
             {children}
             <Toaster richColors position="top-right" />
           </main>
-        </div>
-        </CameraProvider>
+    
+  
+        </AuthProvider>
         </ThemeProvider>
+  
       </body>
     </html>
   )
