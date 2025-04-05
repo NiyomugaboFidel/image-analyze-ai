@@ -73,13 +73,12 @@ export function Sidebar({ className, userProfile }: SidebarProps) {
   return (
     <div className={cn("flex flex-col h-screen bg-white border-r w-16 hover:w-64 transition-width duration-300 overflow-hidden group", className)}>
       <div className="p-3 flex items-center justify-center h-16">
-        <div className="w-8 h-8 rounded-md bg-purple-600 text-white flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-            <path d="M2 17l10 5 10-5"></path>
-            <path d="M2 12l10 5 10-5"></path>
-          </svg>
-        </div>
+      <a href="/" className="flex items-center">
+                <div className="w-8 h-8 rounded bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold">
+                  V
+                </div>
+                <span className="ml-2 text-xl font-bold text-gray-900">Vicky AI</span>
+              </a>
       </div>
 
       <ScrollArea className="flex-1 px-2">

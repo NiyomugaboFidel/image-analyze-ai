@@ -1,160 +1,369 @@
-"use client"
+'use client';
+import React, { useState, useEffect } from 'react';
+import AICardGrid from './components/AiCardGrid';
+import FeaturesSection from './components/FeatureSection';
+import TestimonialSection from './components/Testimonial';
 
-import { useState } from 'react'
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
+const Home: React.FC = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showCookiePopup, setShowCookiePopup] = useState(false);
 
-import { AlertCircle } from "lucide-react"
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
 
-import ImageUploader from '@/components/image-uploader'
-import ImagePreview from '@/components/image-priview'
-import Description, { formatDescription } from '@/components/description'
-import Loader from '@/components/loader'
-import { analyzeImageWithGemini, askFollowUpQuestion, resetAnalysisContext } from './api/analyzeImage'
-import { Input } from '@/components/ui/input'
+  const acceptCookies = () => {
+    // Save to localStorage so it persists across visits
+    localStorage.setItem('cookiesAccepted', 'true');
+    setShowCookiePopup(false);
+  };
 
-export default function Home() {
-  const [imageUrl, setImageUrl] = useState<string>('')
-  const [description, setDescription] = useState<string>('')
-  const [loading, setLoading] = useState<boolean>(false)
-  const [error, setError] = useState<string>('')
-  const [question, setQuestion] = useState<string>('')
-  const [followUpResponses, setFollowUpResponses] = useState<Array<{question: string, answer: string}>>([])
-  const [isFollowUpMode, setIsFollowUpMode] = useState<boolean>(false)
-
-  const handleImageSelected = async (file: File) => {
-    setImageUrl(URL.createObjectURL(file))
-    setDescription('')
-    setError('')
-    setLoading(true)
-    setFollowUpResponses([])
-    setIsFollowUpMode(false)
-  
-    try {
-      // Reset any previous context
-      resetAnalysisContext();
-      
-      const description = await analyzeImageWithGemini(file);
-      setDescription(description);
-      setIsFollowUpMode(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred')
-    } finally {
-      setLoading(false)
-    }
-  }
-  
-  const handleQuestionSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    // Check if user has previously accepted cookies
+    const hasAcceptedCookies = localStorage.getItem('cookiesAccepted');
     
-    if (!question.trim()) return;
-    
-    setLoading(true);
-    setError('');
-    
-    try {
-      const answer = await askFollowUpQuestion(question);
-      setFollowUpResponses(prev => [...prev, {question, answer}]);
-      setQuestion('');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to process your question');
-    } finally {
-      setLoading(false);
-    }
-  }
-  
-  const handleReset = () => {
-    setImageUrl('');
-    setDescription('');
-    setError('');
-    setQuestion('');
-    setFollowUpResponses([]);
-    setIsFollowUpMode(false);
-    resetAnalysisContext();
-  }
+    // Short timeout to let the page load before showing the popup
+    const timer = setTimeout(() => {
+      if (!hasAcceptedCookies) {
+        setShowCookiePopup(true);
+      }
+    }, 1000);
 
-  function formatResponse(text: string) {
-    return text
-        .replace(/\*\*/g, '') // Remove bold markers
-        .replace(/"\b(.*?)\b"/g, '$1') // Remove quotes around text
-        .replace(/\* /g, '') // Remove leading stars in lists
-        .replace(/\n/g, '<br>'); // Convert new lines to HTML line breaks
-}
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
-      {/* <Sidebar /> */}
-      <div className="flex flex-col flex-1 h-full overflow-hidden">
-        {/* <ChatHeader /> */}
-        <main className="flex-1 overflow-auto py-4 w-full">
-          <div className="max-w-3xl mx-auto px-4 space-y-6">
-            {(!imageUrl && !description) && (
-              <div className="flex flex-col items-center justify-center py-20">
-                <h1 className="text-3xl font-semibold mb-4">VICKY AI</h1>
-        
-                <ImageUploader onImageSelected={handleImageSelected} />
-              </div>
-            )}
-
-            {imageUrl && (
-              <>
-                <div className="flex items-center justify-between">
-                  <ImageUploader onImageSelected={handleImageSelected} />
-                  {/* <Button 
-                    variant="outline" 
-                    onClick={handleReset}
-                    className="ml-2"
-                  >
-                    Reset
-                  </Button> */}
+    <div className="bg-white min-h-screen flex flex-col">
+      {/* Navbar */}
+      <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            {/* Logo */}
+            <div className="flex items-center">
+              <a href="/" className="flex items-center">
+                <div className="w-8 h-8 rounded bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold">
+                  V
                 </div>
-                
-                {loading && <Loader />}
-                
-                {error && (
-                  <Alert variant="destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Error</AlertTitle>
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
+                <span className="ml-2 text-xl font-bold text-gray-900">Vicky AI</span>
+              </a>
+              
+              {/* Desktop Navigation */}
+              <nav className="hidden lg:ml-8 lg:flex lg:space-x-8">
+                <a href="#" className="text-gray-900 hover:text-indigo-600 px-3 py-2 text-sm font-medium">
+                  Products
+                </a>
+                <a href="#" className="text-gray-500 hover:text-indigo-600 px-3 py-2 text-sm font-medium">
+                  Solutions
+                </a>
+                <a href="#" className="text-gray-500 hover:text-indigo-600 px-3 py-2 text-sm font-medium">
+                  Pricing
+                </a>
+                <a href="#" className="text-gray-500 hover:text-indigo-600 px-3 py-2 text-sm font-medium">
+                  Resources
+                </a>
+              </nav>
+            </div>
+            
+            {/* Right buttons */}
+            <div className="flex items-center">
+              <a href="#" className="hidden md:block text-gray-500 hover:text-indigo-600 px-3 py-2 text-sm font-medium">
+                Log in
+              </a>
+              <a href="#" className="hidden md:block ml-4 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                Sign up
+              </a>
+              
+              {/* Mobile menu button */}
+              <button 
+                className="ml-4 md:hidden bg-white p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none"
+                onClick={toggleMenu}
+              >
+                {isMenuOpen ? (
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
                 )}
-                
-                <ImagePreview imageUrl={imageUrl} />
-                <Description description={description} />
-                
-                {isFollowUpMode && description && (
-                  <div className="mt-8 border rounded-lg p-4">
-                    <h2 className="text-xl font-medium mb-4">Ask for more details</h2>
-                    <form onSubmit={handleQuestionSubmit} className="flex gap-2">
-                      <Input
-                        placeholder="Ask a question about this image..."
-                        value={question}
-                        onChange={(e:any) => setQuestion(e.target.value)}
-                        disabled={loading}
-                        className="flex-1"
-                      />
-                      <Button className='border bg-[#000] text-white' type="submit" disabled={loading || !question.trim()}>
-                        Ask
-                      </Button>
-                    </form>
-                    
-                    {followUpResponses.length > 0 && (
-                      <div className="mt-6 space-y-4">
-                        {followUpResponses.map((item, index) => (
-                          <div key={index} className="border rounded-md p-4">
-                            <div className="font-medium text-primary">Q: {item.question}</div>
-                            <div className="mt-2" dangerouslySetInnerHTML={{ __html: formatDescription(item.answer) }} />
-                             <div  />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </>
-            )}
+              </button>
+            </div>
           </div>
-        </main>
+          
+          {/* Mobile menu */}
+          <div className={`md:hidden transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+            <div className="px-2 pt-2 pb-4 space-y-1 sm:px-3 border-t border-gray-100">
+              <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-indigo-600 hover:bg-gray-50">
+                Products
+              </a>
+              <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-indigo-600 hover:bg-gray-50">
+                Solutions
+              </a>
+              <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-indigo-600 hover:bg-gray-50">
+                Pricing
+              </a>
+              <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-indigo-600 hover:bg-gray-50">
+                Resources
+              </a>
+              <div className="pt-4 pb-3 border-t border-gray-100">
+                <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-indigo-600 hover:bg-gray-50">
+                  Log in
+                </a>
+                <a href="#" className="block px-3 py-2 mt-1 rounded-md text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                  Sign up
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-grow">
+        {/* Hero Section */}
+        <section className="bg-gradient-to-r from-indigo-700 to-purple-700 text-white">
+          <div className="max-w-7xl mx-auto px-4 py-16 sm:py-24">
+            <div className="text-center">
+              <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
+                <span className="block">Supercharge Your Workflow</span>
+                <span className="block text-indigo-200">with Advanced AI Tools</span>
+              </h1>
+              <p className="mt-6 max-w-xl mx-auto text-xl text-indigo-100">
+                Discover an ecosystem of powerful AI tools designed to enhance creativity, boost productivity, and simplify complex tasks.
+              </p>
+              <div className="mt-10 flex justify-center">
+                <div className="rounded-md shadow">
+                  <a href="#" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-700 bg-white hover:bg-indigo-50 md:py-4 md:text-lg md:px-10">
+                    Get started
+                  </a>
+                </div>
+                <div className="ml-3 rounded-md shadow">
+                  <a href="#" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-800 hover:bg-indigo-900 md:py-4 md:text-lg md:px-10">
+                    View demos
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Search and Categories */}
+        <section className="bg-white border-b border-gray-100 py-8">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="max-w-3xl mx-auto">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search for AI tools..."
+                  className="w-full px-4 py-3 pl-12 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+                <svg className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* AI Card Grid Component */}
+        <AICardGrid />
+        
+        {/* Features Section Component */}
+        <FeaturesSection />
+        
+        {/* Testimonial Section Component */}
+        <TestimonialSection />
+        
+        {/* Usage Statistics */}
+        <section className="bg-indigo-900 text-white py-16">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">Trusted by Innovators Worldwide</h2>
+              <p className="text-indigo-200 max-w-2xl mx-auto">
+                Join thousands of professionals and organizations using our AI platform to transform their work.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+              <div>
+                <div className="text-4xl font-bold text-indigo-300">500K+</div>
+                <p className="text-indigo-200 mt-2">Active Users</p>
+              </div>
+              <div>
+                <div className="text-4xl font-bold text-indigo-300">10M+</div>
+                <p className="text-indigo-200 mt-2">Tasks Completed</p>
+              </div>
+              <div>
+                <div className="text-4xl font-bold text-indigo-300">98%</div>
+                <p className="text-indigo-200 mt-2">Satisfaction Rate</p>
+              </div>
+              <div>
+                <div className="text-4xl font-bold text-indigo-300">1000+</div>
+                <p className="text-indigo-200 mt-2">Enterprise Clients</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap justify-center items-center mt-12 gap-8 opacity-70">
+              <div className="h-8">
+                <img src="/api/placeholder/120/32" alt="Company logo" className="h-full" />
+              </div>
+              <div className="h-8">
+                <img src="/api/placeholder/120/32" alt="Company logo" className="h-full" />
+              </div>
+              <div className="h-8">
+                <img src="/api/placeholder/120/32" alt="Company logo" className="h-full" />
+              </div>
+              <div className="h-8">
+                <img src="/api/placeholder/120/32" alt="Company logo" className="h-full" />
+              </div>
+              <div className="h-8">
+                <img src="/api/placeholder/120/32" alt="Company logo" className="h-full" />
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        {/* CTA Section */}
+        <section className="bg-white py-16">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-xl overflow-hidden">
+              <div className="px-6 py-12 md:p-12 text-center">
+                <h2 className="text-3xl font-bold text-white mb-4">Ready to transform your workflow?</h2>
+                <p className="text-indigo-100 mb-8 max-w-2xl mx-auto">
+                  Join over 500,000 users already using our AI platform to boost productivity and unleash creativity.
+                </p>
+                <div className="flex flex-col sm:flex-row justify-center gap-4">
+                  <a href="#" className="px-8 py-3 bg-white text-indigo-600 font-medium rounded-lg hover:bg-indigo-50 transition-colors">
+                    Start Free Trial
+                  </a>
+                  <a href="#" className="px-8 py-3 bg-transparent border border-white text-white font-medium rounded-lg hover:bg-white/10 transition-colors">
+                    Schedule Demo
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 py-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
+            <div className="col-span-2">
+              <div className="flex items-center">
+                <div className="w-8 h-8 rounded bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold">
+                  A
+                </div>
+                <span className="ml-2 text-xl font-bold">Intellify</span>
+              </div>
+              <p className="mt-4 text-gray-400 max-w-xs">
+                Empowering creators, developers, and businesses with cutting-edge AI tools and solutions.
+              </p>
+              <div className="mt-6 flex space-x-4">
+                <a href="#" className="text-gray-400 hover:text-indigo-400">
+                  <span className="sr-only">Twitter</span>
+                  <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
+                  </svg>
+                </a>
+                <a href="#" className="text-gray-400 hover:text-indigo-400">
+                  <span className="sr-only">LinkedIn</span>
+                  <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"></path>
+                  </svg>
+                </a>
+                <a href="#" className="text-gray-400 hover:text-indigo-400">
+                  <span className="sr-only">GitHub</span>
+                  <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd"></path>
+                  </svg>
+                </a>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">Products</h3>
+              <ul className="mt-4 space-y-2">
+                <li><a href="#" className="text-gray-400 hover:text-white">Text Generator</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white">Image Creator</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white">Code Assistant</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white">Data Analyzer</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white">Video AI</a></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">Company</h3>
+              <ul className="mt-4 space-y-2">
+                <li><a href="#" className="text-gray-400 hover:text-white">About</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white">Careers</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white">Blog</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white">Press</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white">Partners</a></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">Support</h3>
+              <ul className="mt-4 space-y-2">
+                <li><a href="#" className="text-gray-400 hover:text-white">Documentation</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white">API Reference</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white">Guides</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white">Community</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white">Contact Us</a></li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-12 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
+            <p className="text-gray-400">© 2025 Intellify, Inc. All rights reserved.</p>
+            <div className="mt-4 md:mt-0 flex space-x-6">
+              <a href="#" className="text-gray-400 hover:text-white">Privacy Policy</a>
+              <a href="#" className="text-gray-400 hover:text-white">Terms of Service</a>
+              <a href="#" className="text-gray-400 hover:text-white">Cookie Policy</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+      {/* Cookie Policy Popup */}
+      <div 
+        className={`fixed bottom-0 left-0 right-0 bg-gray-900 text-white p-4 z-50 shadow-lg transition-transform duration-500 ease-in-out ${
+          showCookiePopup ? 'translate-y-0' : 'translate-y-full'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between">
+          <div className="mb-4 sm:mb-0">
+            <div className="flex items-center">
+              <svg className="w-6 h-6 mr-2 text-indigo-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+                <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd"></path>
+              </svg>
+              <span className="font-bold">Cookie Notice</span>
+            </div>
+            <p className="text-sm text-gray-300 mt-2">
+              We use cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic. By clicking "Accept All", you consent to our use of cookies.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button 
+              onClick={acceptCookies}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded text-white text-sm font-medium min-w-24 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              Accept All
+            </button>
+            <button 
+              onClick={acceptCookies}
+              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white text-sm font-medium min-w-24 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            >
+              Essential Only
+            </button>
+            <a 
+              href="#" 
+              className="px-4 py-2 text-sm font-medium text-indigo-300 hover:text-indigo-200"
+            >
+              Cookie Policy
+            </a>
+          </div>
+        </div>
       </div>
     </div>
-  )
-}
+  );
+};
+
+export default Home;
