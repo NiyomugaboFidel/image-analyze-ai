@@ -1,8 +1,9 @@
 // app/page.tsx
+import CameraMonitoringSystem from '@/app/components/camera/CameraMonitoringSystem';
 import { CameraCard } from '@/app/components/CameraCard';
 import { Header } from '@/app/components/Header';
 import RecentChatsComponent from '@/app/components/RecentsCard';
-import CameraMonitoringSystem from '@/app/components/VideoPlayer';
+// import CameraMonitoringSystem from '@/app/components/VideoPlayer';
 import { ChatProvider } from '@/app/context/ChatContext';
 import React from 'react';
 
@@ -28,7 +29,8 @@ export default function Home() {
         </div>
         
         <div className="col-span-12 lg:col-span-9 p-4">
-          <CameraMonitoringSystem/>
+          {/* <CameraMonitoringSystem/> */}
+          <CameraMonitoringSystem />
         </div>
             
       

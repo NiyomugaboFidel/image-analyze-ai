@@ -5,7 +5,7 @@ type AICard = {
   title: string;
   description: string;
   icon: string;
-  category: 'productivity' | 'creative' | 'analytics' | 'communication' | 'development';
+  category: 'detection' | 'monitoring' | 'analytics' | 'alerting' | 'compliance';
   rating?: number;
   provider?: string;
   providerUrl?: string;
@@ -15,64 +15,64 @@ type AICard = {
 // cardData.ts
 const aiCards: AICard[] = [
   {
-    id: 'text-generation',
-    title: 'Text Generator',
-    description: 'Generate high-quality content for blogs, marketing, emails and more',
-    icon: 'document-text',
-    category: 'productivity',
+    id: 'hazard-detection',
+    title: 'Hazard Detection',
+    description: 'Real-time AI vision to identify unsafe conditions, dangerous materials, and equipment failures',
+    icon: 'shield-alert',
+    category: 'detection',
     rating: 4.8,
-    provider: 'intellify.ai',
-    bgColor: 'bg-gradient-to-r from-blue-500 to-indigo-600'
+    provider: 'Vicky AI',
+    bgColor: 'bg-gradient-to-r from-red-500 to-orange-600'
   },
   {
-    id: 'image-creator',
-    title: 'Image Creator',
-    description: 'Create stunning visuals from text descriptions in seconds',
-    icon: 'photograph',
-    category: 'creative',
+    id: 'worker-safety',
+    title: 'Worker Safety Monitoring',
+    description: 'Track PPE compliance, unsafe behaviors, and worker positioning in hazardous areas',
+    icon: 'user-check',
+    category: 'monitoring',
     rating: 4.9,
-    provider: 'intellify.ai',
-    bgColor: 'bg-gradient-to-r from-purple-500 to-pink-500'
+    provider: 'Vicky AI',
+    bgColor: 'bg-gradient-to-r from-yellow-500 to-amber-600'
   },
   {
-    id: 'code-assistant',
-    title: 'Code Assistant',
-    description: 'Get help with coding, debugging, and technical documentation',
-    icon: 'code',
-    category: 'development',
+    id: 'compliance-tracking',
+    title: 'Compliance Tracking',
+    description: 'Ensure adherence to safety regulations and standards with automated monitoring',
+    icon: 'clipboard-check',
+    category: 'compliance',
     rating: 4.7,
-    provider: 'codegenius.io',
-    bgColor: 'bg-gradient-to-r from-emerald-500 to-teal-500'
+    provider: 'Vicky AI',
+    bgColor: 'bg-gradient-to-r from-emerald-500 to-teal-600'
   },
   {
-    id: 'data-analyzer',
-    title: 'Data Analyzer',
-    description: 'Transform raw data into actionable insights with AI analysis',
-    icon: 'chart-bar',
+    id: 'safety-analytics',
+    title: 'Safety Analytics',
+    description: 'Transform safety data into actionable insights with comprehensive dashboards',
+    icon: 'bar-chart',
     category: 'analytics',
     rating: 4.6,
-    provider: 'datamagic.com',
-    bgColor: 'bg-gradient-to-r from-amber-500 to-orange-500'
+    provider: 'Vicky AI',
+    bgColor: 'bg-gradient-to-r from-blue-500 to-cyan-600'
   },
   {
-    id: 'video-ai',
-    title: 'Video AI',
-    description: 'Generate engaging videos with voiceovers in any language',
-    icon: 'film',
-    category: 'creative',
-    rating: 4.7,
-    provider: 'videogen.ai',
-    bgColor: 'bg-gradient-to-r from-sky-500 to-blue-500'
-  },
-  {
-    id: 'chat-assistant',
-    title: 'Chat Assistant',
-    description: 'Build custom chatbots for customer service and engagement',
-    icon: 'chat-bubble-left-right',
-    category: 'communication',
+    id: 'alert-system',
+    title: 'Real-time Alerts',
+    description: 'Instant notifications via WhatsApp, email, and in-app messaging when hazards are detected',
+    icon: 'bell',
+    category: 'alerting',
     rating: 4.8,
-    provider: 'chatcraft.io',
-    bgColor: 'bg-gradient-to-r from-green-500 to-emerald-500'
+    provider: 'Vicky AI',
+    bgColor: 'bg-gradient-to-r from-purple-500 to-violet-600'
+  },
+  {
+    id: 'health-monitoring',
+    title: 'Environmental Monitoring',
+    description: 'Track air quality, noise levels, and environmental conditions that affect worker health',
+    icon: 'activity',
+    category: 'monitoring',
+    rating: 4.7,
+    provider: 'Vicky AI',
+    bgColor: 'bg-gradient-to-r from-green-500 to-emerald-600'
   }
 ];
 
@@ -85,12 +85,12 @@ const AICardGrid: React.FC = () => {
   const [filteredCards, setFilteredCards] = useState(aiCards);
 
   const categories = [
-    { id: 'all', name: 'All Tools' },
-    { id: 'productivity', name: 'Productivity' },
-    { id: 'creative', name: 'Creative' },
+    { id: 'all', name: 'All Features' },
+    { id: 'detection', name: 'Hazard Detection' },
+    { id: 'monitoring', name: 'Monitoring' },
     { id: 'analytics', name: 'Analytics' },
-    { id: 'communication', name: 'Communication' },
-    { id: 'development', name: 'Development' }
+    { id: 'alerting', name: 'Alerting' },
+    { id: 'compliance', name: 'Compliance' }
   ];
 
   useEffect(() => {
@@ -103,6 +103,13 @@ const AICardGrid: React.FC = () => {
 
   return (
     <div className="bg-white w-full max-w-7xl mx-auto px-4 py-12">
+      <div className="mb-8 text-center">
+        <h2 className="text-3xl font-bold text-gray-900 mb-4">Construction Safety Features</h2>
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          Discover how our AI-powered platform helps protect workers and prevent accidents before they happen.
+        </p>
+      </div>
+      
       {/* Category filters */}
       <div className="flex flex-wrap justify-center gap-2 mb-8">
         {categories.map(category => (
@@ -111,7 +118,7 @@ const AICardGrid: React.FC = () => {
             onClick={() => setSelectedCategory(category.id)}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
               selectedCategory === category.id
-                ? 'bg-indigo-600 text-white shadow-md'
+                ? 'bg-orange-600 text-white shadow-md'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
@@ -119,6 +126,8 @@ const AICardGrid: React.FC = () => {
           </button>
         ))}
       </div>
+
+
 
       {/* Cards grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -104,6 +104,7 @@ const Login = () => {
             </Button>
           </CardContent>
           <CardFooter className="flex justify-center">
+      
             <div className="text-center text-xs text-muted-foreground dark:text-muted-foreground">
               <Link href="/terms" className="text-primary hover:underline">Terms of Use</Link>
               <span className="mx-2">|</span>

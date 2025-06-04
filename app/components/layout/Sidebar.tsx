@@ -77,7 +77,7 @@ export function Sidebar({ className, userProfile }: SidebarProps) {
                 <div className="w-8 h-8 rounded bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold">
                   V
                 </div>
-                <span className="ml-2 text-xl font-bold text-gray-900">Vicky AI</span>
+           
               </a>
       </div>
 

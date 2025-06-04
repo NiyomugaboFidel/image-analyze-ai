@@ -5,6 +5,7 @@ import './globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from "sonner";
 import { AuthProvider } from './context/AuthoContext'
+import CameraContextProvider from './context/CameraProvider';
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
@@ -56,7 +57,9 @@ export default function RootLayout({
           <AuthProvider>
 
 
-     
+       <CameraContextProvider>
+
+   
        
         
           <main>
@@ -64,7 +67,7 @@ export default function RootLayout({
             <Toaster richColors position="top-right" />
           </main>
     
-  
+          </CameraContextProvider>
         </AuthProvider>
         </ThemeProvider>
   
