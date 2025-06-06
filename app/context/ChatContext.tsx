@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { ChatHistoryItem, Message } from '../types/types';
-import { resetAnalysisContext } from '../api/analyzeImage';
 import { toast } from 'sonner';
 
 interface ChatContextType {
@@ -65,7 +64,6 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
   const clearMessages = () => {
     setMessages([]);
-    resetAnalysisContext();
   };
 
   const addToRecentChats = (title: string, preview: string) => {

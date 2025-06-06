@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
+import { useEffect, useState } from 'react';
 
 import {
   Card,
@@ -75,29 +76,65 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function BarChartCard() {
-  const [activeChart, setActiveChart] =
-    React.useState<keyof typeof chartConfig>("desktop")
+  const [hazardChartData, setHazardChartData] = useState(chartData);
+  const [activeChart, setActiveChart] = React.useState<'desktop' | 'mobile'>('desktop');
+  const [total, setTotal] = useState<{ desktop: number, mobile: number }>({
+    desktop: chartData.reduce((acc, curr) => acc + curr.desktop, 0),
+    mobile: chartData.reduce((acc, curr) => acc + curr.mobile, 0),
+  });
 
-  const total = React.useMemo(
-    () => ({
-      desktop: chartData.reduce((acc, curr) => acc + curr.desktop, 0),
-      mobile: chartData.reduce((acc, curr) => acc + curr.mobile, 0),
-    }),
-    []
-  )
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('dangerDetections');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // Group hazards by date (YYYY-MM-DD)
+        const dateMap: Record<string, number> = {};
+        parsed.forEach((h: any) => {
+          if (h.timestamp) {
+            const d = new Date(h.timestamp);
+            // Format as YYYY-MM-DD
+            const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            dateMap[dateStr] = (dateMap[dateStr] || 0) + 1;
+          }
+        });
+        // Sort by date ascending
+        const sortedDates = Object.keys(dateMap).sort();
+        // For chart compatibility, use hazards count for both desktop and mobile
+        const hazardsData = sortedDates.map(date => ({ date, desktop: dateMap[date], mobile: dateMap[date] }));
+        setHazardChartData(hazardsData);
+        setTotal({
+          desktop: hazardsData.reduce((acc, curr) => acc + curr.desktop, 0),
+          mobile: hazardsData.reduce((acc, curr) => acc + curr.mobile, 0),
+        });
+      } else {
+        setHazardChartData(chartData);
+        setTotal({
+          desktop: chartData.reduce((acc, curr) => acc + curr.desktop, 0),
+          mobile: chartData.reduce((acc, curr) => acc + curr.mobile, 0),
+        });
+      }
+    } catch {
+      setHazardChartData(chartData);
+      setTotal({
+        desktop: chartData.reduce((acc, curr) => acc + curr.desktop, 0),
+        mobile: chartData.reduce((acc, curr) => acc + curr.mobile, 0),
+      });
+    }
+  }, []);
 
   return (
     <Card>
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
-          <CardTitle>Bar Chart - Interactive</CardTitle>
+          <CardTitle>Hazard Trend - Bar Chart</CardTitle>
           <CardDescription>
-            Showing total visitors for the last 3 months
+            Showing hazards per day (from localStorage if available)
           </CardDescription>
         </div>
         <div className="flex">
-          {["desktop", "mobile"].map((key) => {
-            const chart = key as keyof typeof chartConfig
+          {['desktop', 'mobile'].map((key) => {
+            const chart = key as 'desktop' | 'mobile';
             return (
               <button
                 key={chart}
@@ -109,10 +146,10 @@ export function BarChartCard() {
                   {chartConfig[chart].label}
                 </span>
                 <span className="text-lg font-bold leading-none sm:text-3xl">
-                  {total[key as keyof typeof total].toLocaleString()}
+                  {total[chart].toLocaleString()}
                 </span>
               </button>
-            )
+            );
           })}
         </div>
       </CardHeader>
@@ -123,7 +160,7 @@ export function BarChartCard() {
         >
           <BarChart
             accessibilityLayer
-            data={chartData}
+            data={hazardChartData}
             margin={{
               left: 12,
               right: 12,
@@ -148,7 +185,7 @@ export function BarChartCard() {
               content={
                 <ChartTooltipContent
                   className="w-[150px]"
-                  nameKey="views"
+                  nameKey={activeChart}
                   labelFormatter={(value) => {
                     return new Date(value).toLocaleDateString("en-US", {
                       month: "short",

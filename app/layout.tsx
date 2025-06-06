@@ -1,4 +1,4 @@
-// app/layout.tsx
+
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
@@ -10,11 +10,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'VICKY AI || VIDEO AND IMAGE ANALYSIS',
-  // icons: {
-  //   icon: './favicon.ico',
-  //   shortcut: './favicon.ico',
-  //   apple: './favicon.ico',
-  // },
+
   description: 'AI-powered BY VICKY',
   keywords: 'AI, VICKY, image analysis, video analysis',
   authors: [{ name: 'VICKY AI' }],
@@ -46,8 +42,7 @@ export default function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-
+      <body className={inter.className + " bg-white text-gray-900 dark:bg-zinc-900 dark:text-zinc-100 transition-colors duration-300"}>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
@@ -55,22 +50,14 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-
-
-       <CameraContextProvider>
-
-   
-       
-        
-          <main>
-            {children}
-            <Toaster richColors position="top-right" />
-          </main>
-    
-          </CameraContextProvider>
-        </AuthProvider>
+            <CameraContextProvider>
+              <main>
+                {children}
+                <Toaster richColors position="top-right" />
+              </main>
+            </CameraContextProvider>
+          </AuthProvider>
         </ThemeProvider>
-  
       </body>
     </html>
   )

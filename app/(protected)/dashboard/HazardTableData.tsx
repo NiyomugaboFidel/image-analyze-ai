@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -102,14 +102,14 @@ type ColorMapping = Record<string, string>;
 // Helper function to get severity badge with appropriate styling
 const getSeverityBadge = (severity: SeverityLevel) => {
   const colors: ColorMapping = {
-    'Low': 'bg-blue-100 text-blue-800',
-    'Medium': 'bg-yellow-100 text-yellow-800',
-    'High': 'bg-orange-100 text-orange-800',
-    'Critical': 'bg-red-100 text-red-800'
+    'Low': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+    'Medium': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+    'High': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+    'Critical': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
   };
   
   return (
-    <Badge className={colors[severity] || 'bg-gray-100 text-gray-800'}>
+    <Badge className={colors[severity] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'}>
       {severity}
     </Badge>
   );
@@ -118,13 +118,13 @@ const getSeverityBadge = (severity: SeverityLevel) => {
 // Helper function to get status badge with appropriate styling
 const getStatusBadge = (status: StatusType) => {
   const colors: ColorMapping = {
-    'Open': 'bg-red-100 text-red-800',
-    'Resolving': 'bg-yellow-100 text-yellow-800',
-    'Resolved': 'bg-green-100 text-green-800'
+    'Open': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+    'Resolving': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+    'Resolved': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
   };
   
   return (
-    <Badge className={colors[status] || 'bg-gray-100 text-gray-800'}>
+    <Badge className={colors[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'}>
       {status}
     </Badge>
   );
@@ -175,7 +175,35 @@ export function HazardDataTable() {
   const [rowSelection, setRowSelection] = useState({});
   const [dateRange, setDateRange] = useState<any>({});
   const [search, setSearch] = useState<SearchParams>({ query: '', searchFields: ['type', 'location', 'reportedBy'] });
-  
+  const [realHazards, setRealHazards] = useState<Hazard[]>([]);
+
+  // Load hazard data from localStorage if available
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('dangerDetections');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // Map localStorage hazard format to Hazard type
+        const mapped = parsed.map((h: any, idx: number) => ({
+          id: h.id || idx,
+          type: h.description?.toLowerCase().includes('fire') ? 'Fire Risk' : h.description?.toLowerCase().includes('object') ? 'Falling Object' : h.description?.toLowerCase().includes('gear') ? 'Missing Safety Gear' : 'Other',
+          location: h.cameraName || 'Unknown',
+          timestamp: h.timestamp,
+          severity: h.severity ? (h.severity.charAt(0).toUpperCase() + h.severity.slice(1).toLowerCase()) : 'Medium',
+          status: 'Open', // You can enhance this if you store status
+          image: h.image,
+          description: h.description,
+          reportedBy: h.cameraName || 'AI',
+        }));
+        setRealHazards(mapped);
+      } else {
+        setRealHazards(hazardData);
+      }
+    } catch {
+      setRealHazards(hazardData);
+    }
+  }, []);
+
   // Global search filter
   const handleGlobalSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
@@ -366,7 +394,7 @@ export function HazardDataTable() {
 
   // Initialize react-table instance
   const table = useReactTable({
-    data: hazardData,
+    data: realHazards,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -394,7 +422,8 @@ export function HazardDataTable() {
   }, [dateRange, table]);
 
   return (
-    <Card className="w-full">
+  <>
+    <Card className="w-full bg-white dark:bg-gray-900 border border-border dark:border-gray-700">
       <CardHeader>
         <CardTitle>Hazard Management</CardTitle>
         <CardDescription>Monitor and manage safety hazards across all zones</CardDescription>
@@ -405,44 +434,43 @@ export function HazardDataTable() {
             {/* Global search input */}
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-2 top-3 h-4 w-4 text-gray-500" />
+                <Search className="absolute left-2 top-3 h-4 w-4 text-gray-500 dark:text-gray-400" />
                 <Input
                   placeholder="Search hazards..."
                   value={search.query}
                   onChange={handleGlobalSearch}
-                  className="pl-8"
+                  className="pl-8 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border dark:border-gray-700"
                 />
               </div>
               <div className="flex flex-wrap gap-2 mt-2">
                 <Badge 
                   variant={search.searchFields.includes('type') ? "default" : "outline"}
-                  className="cursor-pointer"
+                  className="cursor-pointer dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700"
                   onClick={() => toggleSearchField('type')}
                 >
                   Type
                 </Badge>
                 <Badge 
                   variant={search.searchFields.includes('location') ? "default" : "outline"}
-                  className="cursor-pointer"
+                  className="cursor-pointer dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700"
                   onClick={() => toggleSearchField('location')}
                 >
                   Location
                 </Badge>
                 <Badge 
                   variant={search.searchFields.includes('reportedBy') ? "default" : "outline"}
-                  className="cursor-pointer"
+                  className="cursor-pointer dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700"
                   onClick={() => toggleSearchField('reportedBy')}
                 >
                   Reporter
                 </Badge>
               </div>
             </div>
-            
             {/* Date range picker */}
             <div className="flex gap-2">
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="flex items-center gap-2">
+                  <Button variant="outline" className="flex items-center gap-2 bg-white dark:bg-gray-900 border dark:border-gray-700 text-gray-900 dark:text-gray-100">
                     <CalendarIcon className="h-4 w-4" />
                     {dateRange.from ? (
                       dateRange.to ? (
@@ -457,25 +485,27 @@ export function HazardDataTable() {
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="end">
+                <PopoverContent className="w-auto p-0 bg-white dark:bg-gray-900" align="end">
                   <Calendar
                     initialFocus
                     mode="range"
-                    className='bg-white rounded-md shadow-lg'
+                    className='bg-white dark:bg-gray-900 rounded-md shadow-lg'
                     selected={dateRange}
                     onSelect={setDateRange}
                     numberOfMonths={2}
                   />
-                  <div className=" z-50  bg-white flex justify-end gap-2 p-2 border-b  rounded-b-lg">
+                  <div className="z-50 bg-white dark:bg-gray-900 flex justify-end gap-2 p-2 border-b dark:border-gray-700 rounded-b-lg">
                     <Button 
                       variant="outline" 
                       size="sm"
+                      className="bg-white dark:bg-gray-900 border dark:border-gray-700 text-gray-900 dark:text-gray-100"
                       onClick={() => setDateRange({})}
                     >
                       Clear
                     </Button>
                     <Button 
                       size="sm"
+                      className="bg-white dark:bg-gray-900 border dark:border-gray-700 text-gray-900 dark:text-gray-100"
                       onClick={() => {
                         const today = new Date();
                         const lastWeek = new Date(today);
@@ -488,19 +518,17 @@ export function HazardDataTable() {
                   </div>
                 </PopoverContent>
               </Popover>
-              
               {/* Severity filter */}
               <Select
-              
                 value={(table.getColumn("severity")?.getFilterValue() as string) ?? ""}
                 onValueChange={(value) => 
                   table.getColumn("severity")?.setFilterValue(value === "All" ? "" : value)
                 }
               >
-                <SelectTrigger className="w-36 ">
+                <SelectTrigger className="w-36 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border dark:border-gray-700">
                   <SelectValue placeholder="Severity" />
                 </SelectTrigger>
-                <SelectContent className='bg-white'>
+                <SelectContent className='bg-white dark:bg-gray-900 border dark:border-gray-700'>
                   <SelectItem value="All">All Severities</SelectItem>
                   <SelectItem value="Low">Low</SelectItem>
                   <SelectItem value="Medium">Medium</SelectItem>
@@ -508,7 +536,6 @@ export function HazardDataTable() {
                   <SelectItem value="Critical">Critical</SelectItem>
                 </SelectContent>
               </Select>
-              
               {/* Status filter */}
               <Select
                 value={(table.getColumn("status")?.getFilterValue() as string) ?? ""}
@@ -516,25 +543,24 @@ export function HazardDataTable() {
                   table.getColumn("status")?.setFilterValue(value === "All" ? "" : value)
                 }
               >
-                <SelectTrigger className="w-36">
+                <SelectTrigger className="w-36 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border dark:border-gray-700">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
-                <SelectContent className='bg-white'>
+                <SelectContent className='bg-white dark:bg-gray-900 border dark:border-gray-700'>
                   <SelectItem value="All">All Status</SelectItem>
                   <SelectItem value="Open">Open</SelectItem>
                   <SelectItem value="Resolving">Resolving</SelectItem>
                   <SelectItem value="Resolved">Resolved</SelectItem>
                 </SelectContent>
               </Select>
-              
               {/* Column visibility dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline">
+                  <Button variant="outline" className="bg-white dark:bg-gray-900 border dark:border-gray-700 text-gray-900 dark:text-gray-100">
                     Columns <ChevronDown className="ml-2 h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className='bg-white' align="end">
+                <DropdownMenuContent className='bg-white dark:bg-gray-900 border dark:border-gray-700' align="end">
                   {table
                     .getAllColumns()
                     .filter((column) => column.getCanHide())
@@ -542,7 +568,7 @@ export function HazardDataTable() {
                       return (
                         <DropdownMenuCheckboxItem
                           key={column.id}
-                          className="capitalize"
+                          className="capitalize dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700"
                           checked={column.getIsVisible()}
                           onCheckedChange={(value) =>
                             column.toggleVisibility(!!value)
@@ -557,15 +583,14 @@ export function HazardDataTable() {
             </div>
           </div>
         </div>
-        
         {/* Table */}
-        <div className="rounded-md border">
+        <div className="rounded-md border border-border dark:border-gray-700 bg-white dark:bg-gray-900">
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
+                <TableRow key={headerGroup.id} className="bg-white dark:bg-gray-900">
                   {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b dark:border-gray-700">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -583,9 +608,10 @@ export function HazardDataTable() {
                   <TableRow 
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
+                    className="bg-white dark:bg-gray-900 border-b dark:border-gray-700"
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell key={cell.id} className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b dark:border-gray-700">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
@@ -598,7 +624,7 @@ export function HazardDataTable() {
                 <TableRow >
                   <TableCell
                     colSpan={columns.length}
-                    className="h-24 text-center"
+                    className="h-24 text-center bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b dark:border-gray-700"
                   >
                     No results.
                   </TableCell>
@@ -607,10 +633,9 @@ export function HazardDataTable() {
             </TableBody>
           </Table>
         </div>
-        
         {/* Pagination */}
         <div className="flex items-center justify-end gap-2 py-4">
-          <div className="flex-1 text-sm text-muted-foreground">
+          <div className="flex-1 text-sm text-muted-foreground dark:text-gray-400">
             {table.getFilteredSelectedRowModel().rows.length} of{" "}
             {table.getFilteredRowModel().rows.length} row(s) selected.
           </div>
@@ -620,6 +645,7 @@ export function HazardDataTable() {
               size="sm"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
+              className="bg-white dark:bg-gray-900"
             >
               Previous
             </Button>
@@ -628,6 +654,7 @@ export function HazardDataTable() {
               size="sm"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
+              className="bg-white dark:bg-gray-900"
             >
               Next
             </Button>
@@ -637,12 +664,12 @@ export function HazardDataTable() {
                 table.setPageSize(Number(value));
               }}
             >
-              <SelectTrigger className="w-20">
+              <SelectTrigger className="w-20 bg-white dark:bg-gray-900">
                 <SelectValue placeholder="10" />
               </SelectTrigger>
-              <SelectContent className='bg-white'> 
+              <SelectContent className='bg-white dark:bg-gray-900'> 
                 {[10, 20, 30, 40, 50].map((pageSize) => (
-                  <SelectItem key={pageSize} value={`${pageSize}`}>
+                  <SelectItem key={pageSize} value={`${pageSize}`} className="bg-white dark:bg-gray-900">
                     {pageSize}
                   </SelectItem>
                 ))}
@@ -652,5 +679,146 @@ export function HazardDataTable() {
         </div>
       </CardContent>
     </Card>
+    
+    <div className="mt-8">
+      <RecentMessagesTable hazardData={realHazards} />
+    </div>
+  </>
   );
 }
+
+// Place this at the bottom of the file, outside the main export
+// Accept hazardData as prop to mix with chat for recent activities
+const RecentMessagesTable: React.FC<{ hazardData?: any[] }> = ({ hazardData = [] }) => {
+  const [localRecent, setLocalRecent] = React.useState<any[]>([]);
+  const [search, setSearch] = React.useState('');
+  const [filterRole, setFilterRole] = React.useState('all');
+
+  React.useEffect(() => {
+    try {
+      const stored = localStorage.getItem('hazard_analysis_conversations');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setLocalRecent(parsed.map((conv: any) => ({
+          ...conv,
+          messages: conv.messages || [],
+        })));
+      }
+    } catch (e) {
+      setLocalRecent([]);
+    }
+  }, []);
+
+  // Flatten all messages with chat context
+  const allMessages = localRecent.flatMap((chat) =>
+    chat.messages.map((msg: any) => ({
+      ...msg,
+      chatTitle: chat.title,
+      chatId: chat.id,
+      chatTimestamp: chat.timestamp || chat.updatedAt || chat.createdAt,
+      type: 'chat',
+    }))
+  );
+
+  // Add hazard detections as recent activities
+  const hazardMessages = (hazardData || []).map((hazard) => ({
+    id: hazard.id,
+    chatTitle: hazard.location || hazard.cameraName || 'Hazard',
+    role: 'hazard',
+    content: hazard.description || '',
+    timestamp: hazard.timestamp,
+    imageUrl: hazard.image,
+    type: 'hazard',
+  }));
+
+  // Combine and sort by timestamp (descending)
+  const combined = [...allMessages, ...hazardMessages].sort((a, b) => {
+    const ta = new Date(a.timestamp || a.chatTimestamp || 0).getTime();
+    const tb = new Date(b.timestamp || b.chatTimestamp || 0).getTime();
+    return tb - ta;
+  });
+
+  // Filter/search logic
+  const filteredMessages = combined.filter((msg) => {
+    const matchesSearch =
+      search.trim() === '' ||
+      (msg.content && msg.content.toLowerCase().includes(search.toLowerCase())) ||
+      (msg.chatTitle && msg.chatTitle.toLowerCase().includes(search.toLowerCase()));
+    const matchesRole = filterRole === 'all' || msg.role === filterRole;
+    return matchesSearch && matchesRole;
+  });
+
+  return (
+    <div className="w-full bg-white dark:bg-gray-900 border border-border dark:border-gray-700 rounded-xl shadow-lg">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+        <div className="font-semibold text-lg text-black dark:text-gray-100">Recent AI Messages</div>
+        <div className="flex flex-col md:flex-row gap-2 mt-2 md:mt-0">
+          <input
+            type="text"
+            placeholder="Search messages..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="px-3 py-2 rounded border dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700 bg-white text-gray-900 border-gray-300 focus:outline-none"
+          />
+          <select
+            value={filterRole}
+            onChange={e => setFilterRole(e.target.value)}
+            className="px-3 py-2 rounded border dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700 bg-white text-gray-900 border-gray-300 focus:outline-none"
+          >
+            <option value="all">All Roles</option>
+            <option value="assistant">AI Only</option>
+            <option value="user">User Only</option>
+          </select>
+        </div>
+      </div>
+      <div className="p-4 overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead>
+            <tr>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Chat</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Role</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Message</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Time</th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Image</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredMessages.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="text-center py-8 text-gray-500 dark:text-gray-400">No messages found.</td>
+              </tr>
+            ) : (
+              filteredMessages.map((msg, idx) => (
+                <tr key={`idx-${idx}`} className="border-b border-gray-200 dark:border-gray-700">
+                  <td className="px-4 py-2 text-sm font-semibold text-purple-700 dark:text-purple-300 whitespace-normal break-all">{msg.chatTitle}</td>
+                  <td className="px-4 py-2 text-sm">
+                    <span className={msg.role === 'assistant' ? 'text-purple-700 dark:text-purple-300 font-bold' : 'text-blue-700 dark:text-blue-300 font-bold'}>
+                      {msg.role === 'assistant' ? 'AI' : 'User'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2 text-sm whitespace-pre-wrap max-w-xs">
+                    {msg.content.split(/(\*\*[^*]+\*\*)/g).map((part: string, i: number) => {
+                      if (/^\*\*[^*]+\*\*$/.test(part)) {
+                        return <strong key={i} className="font-bold text-purple-700 dark:text-purple-300">{part.replace(/\*\*/g, '')}</strong>;
+                      }
+                      if (/^\* /.test(part)) {
+                        return <div key={i} className="ml-4 font-bold">{part.replace(/^\* /, '')}</div>;
+                      }
+                      return part;
+                    })}
+                  </td>
+                  <td className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400">{msg.timestamp ? new Date(msg.timestamp).toLocaleString() : ''}</td>
+                  <td className="px-4 py-2">
+                    {msg.imageUrl && (
+                      <img src={msg.imageUrl} alt="msg-img" className="rounded max-h-16 max-w-[80px] object-cover border" />
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};

@@ -8,22 +8,17 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { isAuthenticated, getToken } = useAuth();
+  const { isAuthenticated} = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user is authenticated
-    const token = getToken();
-    console.log('Token:', token);
-    console.log('isAuthenticated:', isAuthenticated);
-    
-    if (!token) {
-      // Redirect to login page if no token is found
+    if (!isAuthenticated) {
+     
       router.push('/auth/login');
     }
-  }, [isAuthenticated, router, getToken]);
+  }, [isAuthenticated, router]);
 
-  // If authenticated, render children
+
   return <>{children}</>;
 };
 

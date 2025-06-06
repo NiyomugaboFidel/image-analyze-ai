@@ -94,44 +94,39 @@ export function Header({
   };
 
   return (
-    <div className="flex flex-col w-full bg-white rounded-lg shadow-sm p-4">
+    <div className="flex flex-col w-full bg-white dark:bg-gray-900 rounded-lg shadow-sm p-4">
       <div className="flex items-center gap-4 mb-3">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-gray-500 hover:bg-gray-100">
+              <Button variant="ghost" size="icon" className="text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
                 <ChevronLeft size={20} />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent className="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
               <p>Back to Dashboard</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
         
-        <h1 className="text-xl font-semibold flex-grow">{title}</h1>
+        <h1 className="text-xl font-semibold flex-grow text-gray-800 dark:text-gray-100">{title}</h1>
         
         {isRecording && (
-          <Badge variant="outline" className="bg-red-50 text-red-600 border-red-200 animate-pulse">
+          <Badge variant="outline" className="bg-red-50 text-red-600 border-red-200 dark:bg-red-900 dark:text-red-200 dark:border-red-700 animate-pulse">
             <span className="w-2 h-2 rounded-full bg-red-500 mr-2"></span>
             Recording
           </Badge>
         )}
       </div>
       
-      <div className="flex items-center text-sm text-gray-600 gap-6 ml-10">
+      <div className="flex items-center text-sm text-gray-600 dark:text-gray-300 gap-6 ml-10">
         <div className="flex items-center gap-2">
-          <Calendar size={14} className="text-gray-400" />
-          <span>{formattedDate}</span>
+          <Calendar size={14} className="text-gray-400 dark:text-gray-400" />
+          <span>{currentDate.toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <Clock size={14} className="text-gray-400" />
-          <span>{duration || (isRecording ? elapsedTime : "0:00")}</span>
-        </div>
-        
         {cameras.length > 0 && (
           <div className="flex items-center gap-2">
-            <Mic size={14} className="text-gray-400" />
+            <Mic size={14} className="text-gray-400 dark:text-gray-400" />
             <span>{cameras.filter(cam => cam.status === 'active').length} of {cameras.length} active</span>
           </div>
         )}
@@ -142,53 +137,53 @@ export function Header({
           <Button 
             variant="outline" 
             size="sm" 
-            className="text-gray-700 hover:bg-gray-50"
+            className="text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
             onClick={onDownload}
           >
-            <Download size={16} className="mr-2 text-gray-500" />
+            <Download size={16} className="mr-2 text-gray-500 dark:text-gray-300" />
             <span>Download</span>
           </Button>
           
           <Button 
             variant="outline" 
             size="sm" 
-            className="text-gray-700 hover:bg-gray-50"
+            className="text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
             onClick={onEdit}
           >
-            <Pencil size={16} className="mr-2 text-gray-500" />
+            <Pencil size={16} className="mr-2 text-gray-500 dark:text-gray-300" />
             <span>Edit</span>
           </Button>
           
           <Button 
             variant={isRecording ? "destructive" : "outline"} 
             size="sm" 
-            className={isRecording ? "bg-red-500 hover:bg-red-600" : "text-gray-700 hover:bg-gray-50"}
+            className={isRecording ? "bg-red-500 hover:bg-red-600 text-white" : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"}
             onClick={toggleRecording}
           >
-            <Mic size={16} className="mr-2" />
+            <Mic size={16} className={isRecording ? "mr-2 text-white" : "mr-2 text-gray-500 dark:text-gray-300"} />
             <span>{isRecording ? "Stop Recording" : "Start Recording"}</span>
           </Button>
           
           <Button 
             variant="outline" 
             size="sm" 
-            className="text-gray-700 hover:bg-gray-50"
+            className="text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
             onClick={onShare}
           >
-            <Share2 size={16} className="mr-2 text-gray-500" />
+            <Share2 size={16} className="mr-2 text-gray-500 dark:text-gray-300" />
             <span>Share</span>
           </Button>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-gray-500 hover:bg-gray-100">
+              <Button variant="ghost" size="icon" className="text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
                 <MoreHorizontal size={16} />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="bg-white dark:bg-gray-900 border dark:border-gray-700 text-gray-800 dark:text-gray-100">
               <DropdownMenuItem>Duplicate</DropdownMenuItem>
               <DropdownMenuItem>Export Settings</DropdownMenuItem>
-              <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+              <DropdownMenuItem className="text-red-600 dark:text-red-400">Delete</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -197,13 +192,13 @@ export function Header({
           onClick={onReset} 
           variant="default" 
           size="sm" 
-          className="bg-purple-600 text-white hover:bg-purple-700"
+          className="bg-purple-600 text-white hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-800"
         >
           Reset
         </Button>
       </div>
       
-      <Separator className="mt-5" />
+      <Separator className="mt-5 bg-gray-200 dark:bg-gray-700" />
     </div>
   );
 }

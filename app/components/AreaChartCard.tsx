@@ -3,6 +3,7 @@
 import * as React from "react"
 import { TrendingUp } from "lucide-react"
 import { Label, Pie, PieChart } from "recharts"
+import { useEffect, useState } from 'react';
 
 import {
   Card,
@@ -52,16 +53,54 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
+const hazardTypeLabels = {
+  'Fire Risk': 'Fire',
+  'Falling Object': 'Falling Object',
+  'Missing Safety Gear': 'Missing Safety Gear',
+  'Other': 'Other',
+};
+
 export function AreaChartCard() {
-  const totalVisitors = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.visitors, 0)
-  }, [])
+  const [hazardChartData, setHazardChartData] = useState(chartData);
+  const [totalHazards, setTotalHazards] = useState<number>(chartData.reduce((acc, curr) => acc + curr.visitors, 0));
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('dangerDetections');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // Count hazards by type
+        const counts: Record<string, number> = {};
+        parsed.forEach((h: any) => {
+          let type = 'Other';
+          if (h.description?.toLowerCase().includes('fire')) type = 'Fire Risk';
+          else if (h.description?.toLowerCase().includes('object')) type = 'Falling Object';
+          else if (h.description?.toLowerCase().includes('gear')) type = 'Missing Safety Gear';
+          counts[type] = (counts[type] || 0) + 1;
+        });
+        const hazardTypes = Object.keys(hazardTypeLabels);
+        const chartHazards = hazardTypes.map((type, idx) => ({
+          browser: hazardTypeLabels[type as keyof typeof hazardTypeLabels] as string,
+          visitors: counts[type] || 0,
+          fill: chartData[idx]?.fill || `var(--color-other)`
+        }));
+        setHazardChartData(chartHazards);
+        setTotalHazards(chartHazards.reduce((acc, curr) => acc + curr.visitors, 0));
+      } else {
+        setHazardChartData(chartData);
+        setTotalHazards(chartData.reduce((acc, curr) => acc + curr.visitors, 0));
+      }
+    } catch {
+      setHazardChartData(chartData);
+      setTotalHazards(chartData.reduce((acc, curr) => acc + curr.visitors, 0));
+    }
+  }, []);
 
   return (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">
-        <CardTitle>Pie Chart - Donut with Text</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+        <CardTitle>Hazard Type Distribution</CardTitle>
+        <CardDescription>Live hazard breakdown</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
@@ -74,7 +113,7 @@ export function AreaChartCard() {
               content={<ChartTooltipContent hideLabel />}
             />
             <Pie
-              data={chartData}
+              data={hazardChartData}
               dataKey="visitors"
               nameKey="browser"
               innerRadius={60}
@@ -95,14 +134,14 @@ export function AreaChartCard() {
                           y={viewBox.cy}
                           className="fill-foreground text-3xl font-bold"
                         >
-                          {totalVisitors.toLocaleString()}
+                          {totalHazards.toLocaleString()}
                         </tspan>
                         <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 24}
                           className="fill-muted-foreground"
                         >
-                          Visitors
+                          Hazards
                         </tspan>
                       </text>
                     )
@@ -115,10 +154,10 @@ export function AreaChartCard() {
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+          Live hazard type breakdown
         </div>
         <div className="leading-none text-muted-foreground">
-          Showing total visitors for the last 6 months
+          Showing hazard type distribution from localStorage
         </div>
       </CardFooter>
     </Card>

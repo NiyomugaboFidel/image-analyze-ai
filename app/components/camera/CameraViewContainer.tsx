@@ -13,10 +13,10 @@ interface CameraViewContainerProps {
   toggleFullscreen: (cameraId: number) => void;
   removeCamera: (cameraId: number) => void;
   onViewImage: (imageUrl: string) => void;
-  // Enhanced props for AI detection
   triggerManualAnalysis?: (cameraId: number) => void;
   dangerDetections?: DangerDetection[];
   aiDetectionEnabled?: boolean;
+  onOpenSettings?: (cameraId: number) => void;
 }
 
 const CameraViewContainer: React.FC<CameraViewContainerProps> = ({
@@ -31,7 +31,8 @@ const CameraViewContainer: React.FC<CameraViewContainerProps> = ({
   onViewImage,
   triggerManualAnalysis,
   dangerDetections = [],
-  aiDetectionEnabled = false
+  aiDetectionEnabled = false,
+  onOpenSettings,
 }) => {
   // Get severity color
   const getSeverityColor = (severity: 'low' | 'medium' | 'high') => {
@@ -41,11 +42,6 @@ const CameraViewContainer: React.FC<CameraViewContainerProps> = ({
       case 'low': return 'bg-yellow-500';
       default: return 'bg-gray-500';
     }
-  };
-
-  // Get camera danger status
-  const getCameraDangerStatus = (cameraId: number) => {
-    return cameras.find(c => c.id === cameraId)?.dangerDetected || false;
   };
 
   // Render individual camera feed
@@ -126,6 +122,17 @@ const CameraViewContainer: React.FC<CameraViewContainerProps> = ({
         >
           🗑️
         </button>
+
+        {/* Settings button */}
+        {onOpenSettings && (
+          <button
+            onClick={() => onOpenSettings(camera.id)}
+            className="p-1.5 bg-gray-500 hover:bg-gray-700 text-white rounded text-xs transition"
+            title="Camera Settings"
+          >
+            ⚙️
+          </button>
+        )}
       </div>
 
       {/* Video element */}
@@ -327,7 +334,7 @@ const CameraViewContainer: React.FC<CameraViewContainerProps> = ({
                       src={camera.lastCapture}
                       alt={`Capture from ${camera.name}`}
                       className="w-full aspect-video object-cover rounded-lg cursor-pointer hover:opacity-80 transition"
-                      onClick={() => onViewImage(camera.lastCapture)}
+                      onClick={() => camera.lastCapture && onViewImage(camera.lastCapture)}
                     />
                     <div className="text-sm text-gray-600 dark:text-gray-400">
                       {camera.name}

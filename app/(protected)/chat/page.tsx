@@ -13,7 +13,7 @@ export default function Home() {
 
 
   return (
-    <div className=" mx-auto p-4">
+    <div className="mx-auto p-4 bg-white dark:bg-gray-900 min-h-screen">
         <ChatProvider>
       
       <Header 
@@ -21,19 +21,17 @@ export default function Home() {
         duration="45 min" 
       />
       
-      <div className="grid grid-cols-12  mt-6">
+      <div className="grid grid-cols-12 mt-6">
         <div className="col-span-12 lg:col-span-3 space-y-6">
           
           <CameraCard />
           <RecentChatsComponent />
         </div>
         
-        <div className="col-span-12 lg:col-span-9 p-4">
+        <div className="col-span-12 lg:col-span-9 p-4 bg-white dark:bg-gray-900 rounded-lg">
           {/* <CameraMonitoringSystem/> */}
           <CameraMonitoringSystem />
         </div>
-            
-      
       </div>
       </ChatProvider>
     </div>

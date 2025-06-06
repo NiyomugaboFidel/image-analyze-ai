@@ -3,10 +3,12 @@ import React, { useState, useEffect } from 'react';
 import AICardGrid from './components/AiCardGrid';
 import FeaturesSection from './components/FeatureSection';
 import TestimonialSection from './components/Testimonial';
+import { useAuth } from './context/AuthoContext';
 
 const Home: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showCookiePopup, setShowCookiePopup] = useState(false);
+  const { isAuthenticated, user } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -65,13 +67,23 @@ const Home: React.FC = () => {
          
             {/* Right buttons */}
             <div className="flex items-center">
-              <a href="/auth/login" className="hidden md:block text-gray-500 hover:text-blue-600 px-3 py-2 text-sm font-medium">
-                Log in
-              </a>
-              <a href="/auth/login" className="hidden md:block ml-4 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
-                Sign up
-              </a>
-              
+              {isAuthenticated && user ? (
+                <>
+                  <span className="text-gray-900 font-semibold mr-4">Hi, {user.name}</span>
+                  <a href="/dashboard" className="ml-2 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                    Dashboard
+                  </a>
+                </>
+              ) : (
+                <>
+                  <a href="/auth/login" className="hidden md:block text-gray-500 hover:text-blue-600 px-3 py-2 text-sm font-medium">
+                    Log in
+                  </a>
+                  <a href="/auth/register" className="hidden md:block ml-4 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                    Sign up
+                  </a>
+                </>
+              )}
               {/* Mobile menu button */}
               <button 
                 className="ml-4 md:hidden bg-white p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none"
@@ -108,12 +120,23 @@ const Home: React.FC = () => {
                 Resources
               </a>
               <div className="pt-4 pb-3 border-t border-gray-100">
-                <a href="/auth/login" className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-blue-600 hover:bg-gray-50">
-                  Log in
-                </a>
-                <a href="/auth/login" className="block px-3 py-2 mt-1 rounded-md text-base font-medium text-white bg-blue-600 hover:bg-blue-700">
-                  Sign up
-                </a>
+                {isAuthenticated && user ? (
+                  <>
+                    <span className="block px-3 py-2 rounded-md text-base font-medium text-gray-900">Hi, {user.name}</span>
+                    <a href="/protected/dashboard" className="block px-3 py-2 mt-1 rounded-md text-base font-medium text-white bg-blue-600 hover:bg-blue-700">
+                      Dashboard
+                    </a>
+                  </>
+                ) : (
+                  <>
+                    <a href="/auth/login" className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-blue-600 hover:bg-gray-50">
+                      Log in
+                    </a>
+                    <a href="/auth/register" className="block px-3 py-2 mt-1 rounded-md text-base font-medium text-white bg-blue-600 hover:bg-blue-700">
+                      Sign up
+                    </a>
+                  </>
+                )}
               </div>
             </div>
           </div>

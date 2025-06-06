@@ -29,7 +29,7 @@ const CameraHeader: React.FC<CameraHeaderProps> = ({
                 variant="outline" 
                 onClick={handleScanForDevices}
                 disabled={isScanning}
-                className="h-9 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 dark:border-gray-600"
+                className="h-9 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 border-gray-300 dark:border-gray-600"
               >
                 {isScanning ? (
                   <RefreshCw size={16} className="mr-2 animate-spin" />

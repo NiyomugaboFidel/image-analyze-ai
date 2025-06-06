@@ -9,7 +9,12 @@ export interface Camera {
   status: 'active' | 'paused' | 'error';
   stream: MediaStream | null;
   errorMessage?: string;
-  lastCapture: string;
+  lastCapture?: string;
+  isAnalyzing: boolean;
+  dangerDetected?: boolean;
+  analysisActive?: boolean;
+  analysisInterval?: NodeJS.Timeout;
+  lastAnalysis?: string;
 }
 
 export interface CameraDevice {
