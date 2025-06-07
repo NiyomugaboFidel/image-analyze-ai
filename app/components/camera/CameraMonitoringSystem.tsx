@@ -88,44 +88,78 @@ const CameraMonitoringSystem: React.FC = () => {
     saveToLocalStorage("dangerDetections", dangerDetections);
   }, [dangerDetections]);
 
-  // Frame capture utility
+  // Enhanced frame capture utility with better error handling
   const captureFrameFromCamera = useCallback((cameraId: number, forAnalysis = false): string | null => {
-    const videoElements = document.querySelectorAll('video');
-    let videoElement: HTMLVideoElement | null = null;
-    for (const element of videoElements) {
-      if (element.getAttribute('data-camera-id') === String(cameraId)) {
-        videoElement = element as HTMLVideoElement;
-        break;
-      }
-    }
-    if (!videoElement || videoElement.readyState < 2) return null;
-    const canvas = forAnalysis ? analysisCanvasRef.current : canvasRef.current;
-    if (!canvas) return null;
-    const { videoWidth, videoHeight } = videoElement;
-    let targetWidth = videoWidth;
-    let targetHeight = videoHeight;
-    if (forAnalysis) {
-      const maxWidth = 640;
-      const maxHeight = 480;
-      const aspectRatio = videoWidth / videoHeight;
-      if (videoWidth > maxWidth) {
-        targetWidth = maxWidth;
-        targetHeight = maxWidth / aspectRatio;
-      }
-      if (targetHeight > maxHeight) {
-        targetHeight = maxHeight;
-        targetWidth = maxHeight * aspectRatio;
-      }
-    }
-    canvas.width = targetWidth;
-    canvas.height = targetHeight;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
     try {
+      const videoElements = document.querySelectorAll('video');
+      let videoElement: HTMLVideoElement | null = null;
+      
+      // Find the correct video element
+      for (const element of videoElements) {
+        if (element.getAttribute('data-camera-id') === String(cameraId)) {
+          videoElement = element as HTMLVideoElement;
+          break;
+        }
+      }
+      
+      // Validate video element and its state
+      if (!videoElement) {
+        console.warn(`Video element not found for camera ${cameraId}`);
+        return null;
+      }
+      
+      if (videoElement.readyState < 2) {
+        console.warn(`Video not ready for camera ${cameraId}, readyState: ${videoElement.readyState}`);
+        return null;
+      }
+      
+      if (videoElement.videoWidth === 0 || videoElement.videoHeight === 0) {
+        console.warn(`Invalid video dimensions for camera ${cameraId}`);
+        return null;
+      }
+      
+      // Create a new canvas for each capture to avoid interference
+      const canvas = document.createElement('canvas');
+      const { videoWidth, videoHeight } = videoElement;
+      let targetWidth = videoWidth;
+      let targetHeight = videoHeight;
+      
+      // Optimize dimensions for analysis
+      if (forAnalysis) {
+        const maxWidth = 640;
+        const maxHeight = 480;
+        const aspectRatio = videoWidth / videoHeight;
+        
+        if (videoWidth > maxWidth) {
+          targetWidth = maxWidth;
+          targetHeight = maxWidth / aspectRatio;
+        }
+        if (targetHeight > maxHeight) {
+          targetHeight = maxHeight;
+          targetWidth = maxHeight * aspectRatio;
+        }
+      }
+      
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      const ctx = canvas.getContext('2d');
+      
+      if (!ctx) {
+        console.error('Could not get canvas context');
+        return null;
+      }
+      
+      // Clear and draw with error handling
       ctx.clearRect(0, 0, targetWidth, targetHeight);
       ctx.drawImage(videoElement, 0, 0, targetWidth, targetHeight);
+      
       const quality = forAnalysis ? 0.7 : 0.9;
-      return canvas.toDataURL('image/jpeg', quality);
+      const dataUrl = canvas.toDataURL('image/jpeg', quality);
+      
+      // Clean up canvas
+      canvas.remove();
+      
+      return dataUrl;
     } catch (error) {
       console.error(`Error capturing frame from camera ${cameraId}:`, error);
       return null;
@@ -141,6 +175,7 @@ const CameraMonitoringSystem: React.FC = () => {
     captureFrameFromCamera,
     analysisInterval
   });
+  
   const { addCamera, saveNewCamera, removeCamera, toggleFullscreen } = useCameraManagement({
     cameras,
     setCameras,
@@ -177,81 +212,137 @@ const CameraMonitoringSystem: React.FC = () => {
     }
   }, [scanForDevices, availableDevices.length, currentDeviceId]);
 
-  // Initialize
-  useEffect(() => {
-    canvasRef.current = document.createElement('canvas');
-    analysisCanvasRef.current = document.createElement('canvas');
-    
-    if (availableDevices.length === 0) {
-      handleScanForDevices();
-    }
-    
-    return () => {
-      cameras.forEach(camera => {
-        if (camera.stream) {
-          camera.stream.getTracks().forEach(track => track.stop());
-        }
-        if (camera.analysisInterval) {
-          clearInterval(camera.analysisInterval);
-        }
-      });
-    };
-  }, [availableDevices.length, handleScanForDevices, cameras]);
-
-  // Camera stream management
+  // Enhanced camera stream management
   const startCameraStream = useCallback(async (cameraId: number): Promise<void> => {
     const camera = cameras.find(c => c.id === cameraId);
     if (!camera) return;
 
-    try {
-      if (camera.stream) {
-        camera.stream.getTracks().forEach(track => track.stop());
-      }
-      
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { 
-          deviceId: { exact: camera.deviceId },
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        }
+    // Stop existing stream first
+    if (camera.stream) {
+      camera.stream.getTracks().forEach(track => {
+        track.stop();
+        track.removeEventListener('ended', () => {});
       });
+    }
+
+    try {
+      // Clear any existing analysis
+      stopAIAnalysis(cameraId);
       
+      // Update status to indicate starting
       setCameras(prev => prev.map(c => 
-        c.id === cameraId ? { ...c, status: 'active', stream, errorMessage: undefined } : c
+        c.id === cameraId ? { 
+          ...c, 
+          status: 'active', 
+          errorMessage: undefined,
+          isAnalyzing: false,
+          dangerDetected: false
+        } : c
       ));
       
+      const constraints = {
+        video: { 
+          deviceId: { exact: camera.deviceId },
+          width: { ideal: 1280, min: 640 },
+          height: { ideal: 720, min: 480 },
+          frameRate: { ideal: 30, min: 15 }
+        }
+      };
+      
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      
+      // Add event listeners to track stream state
+      stream.getTracks().forEach(track => {
+        track.addEventListener('ended', () => {
+          console.warn(`Camera ${cameraId} track ended unexpectedly`);
+          setCameras(prev => prev.map(c => 
+            c.id === cameraId ? { 
+              ...c, 
+              status: 'error', 
+              errorMessage: 'Camera stream ended unexpectedly',
+              stream: null
+            } : c
+          ));
+        });
+        
+        track.addEventListener('mute', () => {
+          console.warn(`Camera ${cameraId} track muted`);
+        });
+        
+        track.addEventListener('unmute', () => {
+          console.log(`Camera ${cameraId} track unmuted`);
+        });
+      });
+      
+      // Update camera with new stream
+      setCameras(prev => prev.map(c => 
+        c.id === cameraId ? { 
+          ...c, 
+          status: 'active', 
+          stream, 
+          errorMessage: undefined,
+          isAnalyzing: false,
+          dangerDetected: false
+        } : c
+      ));
+      
+      // Wait for video element to be ready before starting analysis
       if (aiDetectionEnabled) {
-        setTimeout(() => startAIAnalysis(cameraId), 3000);
+        setTimeout(() => {
+          // Verify stream is still active before starting analysis
+          const currentCamera = cameras.find(c => c.id === cameraId);
+          if (currentCamera?.stream && currentCamera.status === 'active') {
+            startAIAnalysis(cameraId);
+          }
+        }, 3000);
       }
       
       toast.success(`${camera.name} is now streaming`);
     } catch (error: any) {
+      console.error(`Camera ${cameraId} stream error:`, error);
+      
       setCameras(prev => prev.map(c => 
         c.id === cameraId ? { 
           ...c, 
           status: 'error', 
-          errorMessage: `Failed to access camera: ${error.message}` 
+          stream: null,
+          errorMessage: `Failed to access camera: ${error.message}`,
+          isAnalyzing: false,
+          dangerDetected: false
         } : c
       ));
       
-      toast.error(`Failed to access ${camera.name}`);
+      toast.error(`Failed to access ${camera.name}: ${error.message}`);
     }
-  }, [cameras, setCameras, aiDetectionEnabled, startAIAnalysis]);
+  }, [cameras, setCameras, aiDetectionEnabled, startAIAnalysis, stopAIAnalysis]);
 
   const stopCameraStream = useCallback((cameraId: number): void => {
     const camera = cameras.find(c => c.id === cameraId);
-    if (!camera?.stream) return;
+    if (!camera) return;
     
+    // Stop AI analysis first
     stopAIAnalysis(cameraId);
-    camera.stream.getTracks().forEach(track => track.stop());
     
+    // Stop media stream tracks
+    if (camera.stream) {
+      camera.stream.getTracks().forEach(track => {
+        track.stop();
+        // Remove event listeners
+        track.removeEventListener('ended', () => {});
+        track.removeEventListener('mute', () => {});
+        track.removeEventListener('unmute', () => {});
+      });
+    }
+    
+    // Update camera state
     setCameras(prev => prev.map(c => 
       c.id === cameraId ? { 
         ...c, 
         status: 'paused', 
         stream: null, 
         dangerDetected: false,
-        isAnalyzing: false
+        isAnalyzing: false,
+        errorMessage: undefined
       } : c
     ));
     
@@ -269,13 +360,50 @@ const CameraMonitoringSystem: React.FC = () => {
     }
   }, [cameras, stopCameraStream, startCameraStream]);
 
+  // Initialize - create canvas refs only once
+  useEffect(() => {
+    if (!canvasRef.current) {
+      canvasRef.current = document.createElement('canvas');
+    }
+    if (!analysisCanvasRef.current) {
+      analysisCanvasRef.current = document.createElement('canvas');
+    }
+    
+    if (availableDevices.length === 0) {
+      handleScanForDevices();
+    }
+    
+    // Cleanup function
+    return () => {
+      cameras.forEach(camera => {
+        if (camera.stream) {
+          camera.stream.getTracks().forEach(track => {
+            track.stop();
+            track.removeEventListener('ended', () => {});
+            track.removeEventListener('mute', () => {});
+            track.removeEventListener('unmute', () => {});
+          });
+        }
+        if (camera.analysisInterval) {
+          clearInterval(camera.analysisInterval);
+        }
+      });
+    };
+  }, [availableDevices.length, handleScanForDevices]);
+
   // UI interactions
   const captureImage = useCallback((cameraId: number): void => {
     const camera = cameras.find(c => c.id === cameraId);
-    if (!camera || camera.status !== 'active') return;
+    if (!camera || camera.status !== 'active') {
+      toast.error("Camera is not active");
+      return;
+    }
     
     const imageUrl = captureFrameFromCamera(cameraId, false);
-    if (!imageUrl) return;
+    if (!imageUrl) {
+      toast.error("Failed to capture image");
+      return;
+    }
     
     setCameras(prev => prev.map(c => 
       c.id === cameraId ? { ...c, lastCapture: imageUrl } : c
@@ -285,6 +413,7 @@ const CameraMonitoringSystem: React.FC = () => {
     setPreviewDialogOpen(true);
     
     toast.success(`Captured image from ${camera.name}`);
+    
     // If chat ref exists, start a new chat with the image
     if (imageAnalysisChatRef.current && typeof imageAnalysisChatRef.current.startChatWithImage === 'function') {
       imageAnalysisChatRef.current.startChatWithImage(imageUrl, camera.name);
@@ -297,21 +426,28 @@ const CameraMonitoringSystem: React.FC = () => {
   }, []);
 
   const triggerManualAnalysis = useCallback((cameraId: number): void => {
+    const camera = cameras.find(c => c.id === cameraId);
+    if (!camera || camera.status !== 'active') {
+      toast.error("Camera is not active");
+      return;
+    }
+    
     analyzeFrameForDangers(cameraId);
     toast.info("Analyzing current frame...");
-  }, [analyzeFrameForDangers]);
+  }, [analyzeFrameForDangers, cameras]);
 
   const toggleAIDetection = useCallback((): void => {
     const newState = !aiDetectionEnabled;
     setAiDetectionEnabled(newState);
     
     if (newState) {
-      cameras.forEach(camera => {
-        if (camera.status === 'active') {
-          setTimeout(() => startAIAnalysis(camera.id), 1000);
-        }
+      // Only start analysis for active cameras
+      const activeCameras = cameras.filter(camera => camera.status === 'active');
+      activeCameras.forEach(camera => {
+        setTimeout(() => startAIAnalysis(camera.id), 1000);
       });
     } else {
+      // Stop analysis for all cameras
       cameras.forEach(camera => {
         stopAIAnalysis(camera.id);
       });
@@ -357,11 +493,13 @@ const CameraMonitoringSystem: React.FC = () => {
         setAutoStart={setAutoStart}
         availableDevices={availableDevices}
       />
+      
       <ImagePreviewDialog 
         open={previewDialogOpen} 
         onClose={() => setPreviewDialogOpen(false)} 
         imageUrl={capturedImage}
       />
+      
       {cameras.length > 0 && (
         <ImageAnalysisChat ref={imageAnalysisChatRef} />
       )}

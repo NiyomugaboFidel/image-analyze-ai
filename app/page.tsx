@@ -59,6 +59,7 @@ const Home: React.FC = () => {
                 </a>
                 <a href="#" className="text-gray-500 hover:text-blue-600 px-3 py-2 text-sm font-medium">
                   Pricing
+                  
                 </a>
                 <a href="#" className="text-gray-500 hover:text-blue-600 px-3 py-2 text-sm font-medium">
                   Resources

@@ -65,7 +65,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string) => {
     const found = users.find(u => u.email === email && u.password === password);
-    if (!found) throw new Error('Invalid credentials');
+    if (!found) {
+      setIsAuthenticated(false);
+      setUser(null);
+      localStorage.removeItem('auth_user');
+      throw new Error('Invalid credentials');
+    }
     setIsAuthenticated(true);
     const authUser = { id: found.id, name: found.name, role: found.role, avatarUrl: found.avatarUrl };
     setUser(authUser);

@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/app/context/AuthoContext';
 
 // Import icons from Lucide React
 import { 
@@ -41,6 +42,7 @@ type SidebarProps = {
 
 export function Sidebar({ className, userProfile }: SidebarProps) {
   const pathname = usePathname();
+  const { logout } = useAuth();
 
   const mainNavItems: NavItem[] = [
     { icon: <LayoutDashboard size={20} />, label: 'Dashboard', href: '/dashboard' },
@@ -109,7 +111,6 @@ export function Sidebar({ className, userProfile }: SidebarProps) {
         {userProfile && (
           <div className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={userProfile.avatarUrl} alt={userProfile.name} />
               <AvatarFallback>{userProfile.name}</AvatarFallback>
             </Avatar>
             <div className="hidden group-hover:block transition-all">
@@ -117,7 +118,12 @@ export function Sidebar({ className, userProfile }: SidebarProps) {
             </div>
           </div>
         )}
-        <Button variant="ghost" size="icon" className="w-full justify-start mt-2 group-hover:justify-start text-zinc-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="w-full justify-start mt-2 group-hover:justify-start text-zinc-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+          onClick={logout}
+        >
           <LogOut className="h-5 w-5" />
           <span className="ml-2 hidden group-hover:inline-block">Log out</span>
         </Button>

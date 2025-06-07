@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AreaChartCard } from '../../components/AreaChartCard';
 import { BarChartCard } from '../../components/BarChartCard';
-import { hazardData, HazardDataTable } from '../dashboard/HazardTableData';
 
 
 // Define TypeScript interfaces for our data structures
@@ -18,7 +17,7 @@ interface Hazard {
 }
 
 const ChartStatisticsPage: React.FC = () => {
-  const [realHazards, setRealHazards] = useState<Hazard[]>(hazardData);
+  const [realHazards, setRealHazards] = useState<Hazard[]>([]);
 
   useEffect(() => {
     try {
@@ -36,10 +35,10 @@ const ChartStatisticsPage: React.FC = () => {
         }));
         setRealHazards(mapped);
       } else {
-        setRealHazards(hazardData);
+        setRealHazards([]);
       }
     } catch {
-      setRealHazards(hazardData);
+      setRealHazards([]);
     }
   }, []);
 

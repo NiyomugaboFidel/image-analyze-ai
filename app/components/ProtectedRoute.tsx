@@ -1,6 +1,6 @@
 // src/components/ProtectedRoute.tsx
 import { useEffect } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthoContext';
 
 interface ProtectedRouteProps {
@@ -8,16 +8,15 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { isAuthenticated} = useAuth();
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isAuthenticated) {
-     
+    const storedUser = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
+    if (!isAuthenticated && !storedUser) {
       router.push('/auth/login');
     }
   }, [isAuthenticated, router]);
-
 
   return <>{children}</>;
 };

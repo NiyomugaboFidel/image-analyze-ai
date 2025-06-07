@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CameraProvider } from "../context/CameraContextProvider";
-import ChatHeader from "@/components/ chart-header";
 import { Sidebar } from "../components/layout/Sidebar";
 import { useAuth } from "../context/AuthoContext";
+import ChatHeader from "@/components/ chart-header";
 
 export default function ProtectedLayout({
   children,
@@ -14,24 +14,24 @@ export default function ProtectedLayout({
 }) {
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
-  const [userAuth, setUserAuth] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      setUserAuth(localStorage.getItem("auth_user"));
-    }
-  }, []);
 
-  useEffect(() => {
-    if (!isAuthenticated && !userAuth) {
-      router.push("/auth/login");
-    } else {
-      setIsLoading(false);
-    }
-  }, [isAuthenticated, userAuth, router]);
+    const timer = setTimeout(() => {
+      setIsInitialized(true);
+      
 
-  if (isLoading || !isAuthenticated) {
+      if (!isAuthenticated) {
+        router.push("/auth/login");
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [isAuthenticated, router]);
+
+
+  if (!isInitialized) {
     return (
       <div className="flex flex-col justify-center items-center h-screen bg-gradient-to-br from-purple-600 via-blue-500 to-indigo-700 animate-fade-in">
         <div className="relative flex flex-col items-center">
@@ -45,6 +45,11 @@ export default function ProtectedLayout({
         </div>
       </div>
     );
+  }
+
+ 
+  if (!isAuthenticated) {
+    return null; 
   }
 
   return (

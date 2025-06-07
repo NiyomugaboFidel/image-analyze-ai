@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Bell, Calendar as CalendarIcon, Filter, MoreVertical, Search, AlertTriangle, HardHat, ArrowDown, FireExtinguisher } from 'lucide-react';
 import { BarChartCard } from '../../components/BarChartCard';
 import { AreaChartCard } from '../../components/AreaChartCard';
-import { hazardData, HazardDataTable } from './HazardTableData';
+import { HazardDataTable } from './HazardTableData';
 
 
 interface Hazard {
@@ -43,14 +43,13 @@ type SeverityFilter = 'All' | 'Low' | 'Medium' | 'High' | 'Critical';
 
 const ConstructionMonitoringDashboard: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>(notificationData);
-  const [realHazards, setRealHazards] = useState<Hazard[]>(hazardData);
+  const [realHazards, setRealHazards] = useState<Hazard[]>([]);
 
   useEffect(() => {
     try {
       const stored = localStorage.getItem('dangerDetections');
       if (stored) {
         const parsed = JSON.parse(stored);
-      
         const mapped = parsed.map((h: any, idx: number) => ({
           id: h.id || idx,
           type: h.description?.toLowerCase().includes('fire') ? 'Fire Risk' : h.description?.toLowerCase().includes('object') ? 'Falling Object' : h.description?.toLowerCase().includes('gear') ? 'Missing Safety Gear' : 'Other',
@@ -84,11 +83,11 @@ const ConstructionMonitoringDashboard: React.FC = () => {
         });
         setNotifications(hazardNotifications);
       } else {
-        setRealHazards(hazardData);
+        setRealHazards([]);
         setNotifications(notificationData);
       }
     } catch {
-      setRealHazards(hazardData);
+      setRealHazards([]);
       setNotifications(notificationData);
     }
   }, []);

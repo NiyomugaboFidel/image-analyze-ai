@@ -77,25 +77,6 @@ export interface Hazard {
   reportedBy?: string;  // Optional field for tracking who reported
 }
 
-// Sample hazard data
-export const hazardData: Hazard[] = [
-  { id: 1, type: 'Missing Safety Gear', location: 'Zone A', timestamp: '2025-03-31T09:15:00', severity: 'High', status: 'Open', image: '/api/placeholder/400/300', reportedBy: 'John Smith' },
-  { id: 2, type: 'Fire Risk', location: 'Zone B', timestamp: '2025-03-31T10:30:00', severity: 'Critical', status: 'Resolving', image: '/api/placeholder/400/300', reportedBy: 'Maria Garcia' },
-  { id: 3, type: 'Falling Object', location: 'Zone C', timestamp: '2025-03-30T14:45:00', severity: 'Medium', status: 'Resolved', image: '/api/placeholder/400/300', reportedBy: 'Ahmed Hassan' },
-  { id: 4, type: 'Missing Safety Gear', location: 'Zone D', timestamp: '2025-03-29T11:20:00', severity: 'Low', status: 'Resolved', image: '/api/placeholder/400/300', reportedBy: 'Sarah Johnson' },
-  { id: 5, type: 'Fire Risk', location: 'Zone A', timestamp: '2025-03-28T16:05:00', severity: 'High', status: 'Open', image: '/api/placeholder/400/300', reportedBy: 'James Wilson' },
-    { id: 6, type: 'Falling Object', location: 'Zone B', timestamp: '2025-03-27T08:50:00', severity: 'Medium', status: 'Resolving', image: '/api/placeholder/400/300', reportedBy: 'Emily Davis' },
-    { id: 7, type: 'Other', location: 'Zone C', timestamp: '2025-03-26T12:15:00', severity: 'Low', status: 'Resolved', image: '/api/placeholder/400/300' },
-    { id: 8, type: 'Missing Safety Gear', location: 'Zone D', timestamp: '2025-03-25T09:30:00', severity: 'Critical', status: 'Open', image: '/api/placeholder/400/300' },
-    { id: 9, type: 'Fire Risk', location: 'Zone A', timestamp: '2025-03-24T14:00:00', severity: 'High', status: 'Resolving', image: '/api/placeholder/400/300' },
-    { id: 10, type: 'Falling Object', location: 'Zone B', timestamp: '2025-03-23T11:45:00', severity: 'Medium', status: 'Resolved', image: '/api/placeholder/400/300' },
-    { id: 11, type: 'Other', location: 'Zone C', timestamp: '2025-03-22T10:20:00', severity: 'Low', status: 'Open', image: '/api/placeholder/400/300' },
-    { id: 12, type: 'Missing Safety Gear', location: 'Zone D', timestamp: '2025-03-21T15:10:00', severity: 'Critical', status: 'Resolving', image: '/api/placeholder/400/300' },
-    { id: 13, type: 'Fire Risk', location: 'Zone A', timestamp: '2025-03-20T13:00:00', severity: 'High', status: 'Resolved', image: '/api/placeholder/400/300' },   
-    { id: 14, type: 'Falling Object', location: 'Zone B', timestamp: '2025-03-19T12:30:00', severity: 'Medium', status: 'Open', image: '/api/placeholder/400/300' },
-    { id: 15, type: 'Other', location: 'Zone C', timestamp: '2025-03-18T10:45:00', severity: 'Low', status: 'Resolving', image: '/api/placeholder/400/300' },
-];
-
 // Color mapping with types for better intellisense
 type ColorMapping = Record<string, string>;
 
@@ -197,10 +178,10 @@ export function HazardDataTable() {
         }));
         setRealHazards(mapped);
       } else {
-        setRealHazards(hazardData);
+        setRealHazards([]); // No demo data fallback
       }
     } catch {
-      setRealHazards(hazardData);
+      setRealHazards([]); // No demo data fallback
     }
   }, []);
 
