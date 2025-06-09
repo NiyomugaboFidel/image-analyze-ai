@@ -68,7 +68,7 @@ const ChartStatisticsPage: React.FC = () => {
               <CardTitle className="text-sm font-medium text-gray-500 dark:text-gray-400">Critical Alerts</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-red-600 dark:text-red-400">{realHazards.filter(h => h.severity === 'Critical').length}</p>
+              <p className="text-3xl font-bold text-red-600 dark:text-red-400">{realHazards.filter(h => h.severity === 'High').length}</p>
             </CardContent>
           </Card>
           <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm">
