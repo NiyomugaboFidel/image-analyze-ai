@@ -26,9 +26,6 @@ const Register = () => {
       setLoading(false);
     }
   };
-const handleGoogleLogin = () => {
-  window.location.href = "http://localhost:5000/auth/google"; 
-};
 
   return (
     <div className="flex min-h-screen relative">
@@ -68,7 +65,7 @@ const handleGoogleLogin = () => {
                   required
                 />
                 {error && <div className="text-red-500 text-sm text-center">{error}</div>}
-                <Button type="submit" className="w-full py-3 text-lg rounded-xl font-semibold bg-gradient-to-r from-purple-500 to-blue-500 hover:from-blue-500 hover:to-purple-500 text-white shadow-lg transition-all duration-200" disabled={loading}>
+                <Button type="submit" className="w-full py-6 text-lg rounded-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-all duration-200" disabled={loading}>
                   {loading ? 'Registering...' : 'Register'}
                 </Button>
               </form>
@@ -77,6 +74,7 @@ const handleGoogleLogin = () => {
                 <span className="mx-2 text-xs text-zinc-400">or</span>
                 <div className="flex-grow border-t border-zinc-300 dark:border-zinc-700"></div>
               </div>
+<<<<<<< HEAD
               <Button
                 // onClick={() => window.location.href = "http://localhost:5000/auth/google"}
                 variant="outline"
@@ -93,6 +91,8 @@ const handleGoogleLogin = () => {
                 </svg>
                 Continue with Google
               </Button>
+=======
+>>>>>>> 46ee5a57dc5d176b04f1c5d9c0bdadeb4e068b7b
               <div className="text-center text-sm mt-4">
                 Already have an account?{' '}
                 <Link href="/auth/login" className="text-primary dark:text-purple-300 hover:underline font-semibold">Login</Link>

@@ -51,17 +51,16 @@ const Home: React.FC = () => {
               
               {/* Desktop Navigation */}
               <nav className="hidden  lg:ml-8 lg:flex lg:space-x-8">
-                <a href="#" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium">
+                <a href="#products" className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium">
                   Products
                 </a>
-                <a href="#" className="text-gray-500 hover:text-blue-600 px-3 py-2 text-sm font-medium">
+                <a href="#solutions" className="text-gray-500 hover:text-blue-600 px-3 py-2 text-sm font-medium">
                   Solutions
                 </a>
-                <a href="#" className="text-gray-500 hover:text-blue-600 px-3 py-2 text-sm font-medium">
+                <a href="#pricing" className="text-gray-500 hover:text-blue-600 px-3 py-2 text-sm font-medium">
                   Pricing
-                  
                 </a>
-                <a href="#" className="text-gray-500 hover:text-blue-600 px-3 py-2 text-sm font-medium">
+                <a href="#resources" className="text-gray-500 hover:text-blue-600 px-3 py-2 text-sm font-medium">
                   Resources
                 </a>
               </nav>
@@ -108,16 +107,16 @@ const Home: React.FC = () => {
           {/* Mobile menu */}
           <div className={`md:hidden transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
             <div className="px-2 pt-2 pb-4 space-y-1 sm:px-3 border-t border-gray-100">
-              <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-blue-600 hover:bg-gray-50">
+              <a href="#products" className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-blue-600 hover:bg-gray-50">
                 Products
               </a>
-              <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-blue-600 hover:bg-gray-50">
+              <a href="#solutions" className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-blue-600 hover:bg-gray-50">
                 Solutions
               </a>
-              <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-blue-600 hover:bg-gray-50">
+              <a href="#pricing" className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-blue-600 hover:bg-gray-50">
                 Pricing
               </a>
-              <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-blue-600 hover:bg-gray-50">
+              <a href="#resources" className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-blue-600 hover:bg-gray-50">
                 Resources
               </a>
               <div className="pt-4 pb-3 border-t border-gray-100">
@@ -191,16 +190,19 @@ const Home: React.FC = () => {
         </section>
 
         {/* AI Card Grid Component */}
-        <AICardGrid />
-        
+        <section id="products">
+          <AICardGrid />
+        </section>
         {/* Features Section Component */}
-        <FeaturesSection />
-        
+        <section id="solutions">
+          <FeaturesSection />
+        </section>
         {/* Testimonial Section Component */}
-        <TestimonialSection />
-        
+        <section id="resources">
+          <TestimonialSection />
+        </section>
         {/* Usage Statistics */}
-        <section className="bg-blue-900 text-white py-16">
+        <section id="pricing" className="bg-blue-900 text-white py-16">
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold mb-4">Trusted by Safety Leaders Worldwide</h2>

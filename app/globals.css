@@ -116,3 +116,7 @@ body {
   50% { stop-color: #8B5CF6; }
   100% { stop-color: #3B82F6; }
 }
+
+html {
+  scroll-behavior: smooth;
+}

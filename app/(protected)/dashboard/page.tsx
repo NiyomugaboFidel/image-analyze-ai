@@ -30,19 +30,8 @@ interface Notification {
 
 
 
-const notificationData: Notification[] = [
-  { id: 1, message: 'Critical hazard detected in Zone B', time: '1 hour ago', read: false },
-  { id: 2, message: 'Hazard #3 has been resolved', time: '3 hours ago', read: true },
-  { id: 3, message: '2 new hazards detected today', time: '5 hours ago', read: true },
-];
-
-
-
-type StatusFilter = 'All' | 'Open' | 'Resolving' | 'Resolved';
-type SeverityFilter = 'All' | 'Low' | 'Medium' | 'High' | 'Critical';
-
 const ConstructionMonitoringDashboard: React.FC = () => {
-  const [notifications, setNotifications] = useState<Notification[]>(notificationData);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [realHazards, setRealHazards] = useState<Hazard[]>([]);
 
   useEffect(() => {
@@ -61,7 +50,6 @@ const ConstructionMonitoringDashboard: React.FC = () => {
         }));
         setRealHazards(mapped);
 
-       
         interface HazardNotification extends Notification {
           hazardId: number;
         }
@@ -81,14 +69,18 @@ const ConstructionMonitoringDashboard: React.FC = () => {
             read: false,
           };
         });
+        // Store notifications in localStorage
+        localStorage.setItem('notifications', JSON.stringify(hazardNotifications));
         setNotifications(hazardNotifications);
       } else {
         setRealHazards([]);
-        setNotifications(notificationData);
+        setNotifications([]);
+        localStorage.setItem('notifications', JSON.stringify([]));
       }
     } catch {
       setRealHazards([]);
-      setNotifications(notificationData);
+      setNotifications([]);
+      localStorage.setItem('notifications', JSON.stringify([]));
     }
   }, []);
 
@@ -250,7 +242,7 @@ const ConstructionMonitoringDashboard: React.FC = () => {
               <CardTitle className="text-sm font-medium text-gray-500 dark:text-gray-400">Critical Alerts</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold text-red-600 dark:text-red-400">{realHazards.filter(h => h.severity === 'Critical').length}</p>
+              <p className="text-2xl font-bold text-red-600 dark:text-red-400">{realHazards.filter(h => h.severity === 'High').length}</p>
             </CardContent>
           </Card>
           

@@ -13,23 +13,59 @@ interface Notification {
   read: boolean;
 }
 
-const notificationData: Notification[] = [
-  { id: 1, message: 'Critical hazard detected in Zone B', time: '1 hour ago', read: false },
-  { id: 2, message: 'Hazard #3 has been resolved', time: '3 hours ago', read: true },
-  { id: 3, message: '2 new hazards detected today', time: '5 hours ago', read: true },
-];
-
 const NotificationPage: React.FC = () => {
-  const [notifications, setNotifications] = useState<Notification[]>(notificationData);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
+  // Helper to format time ago
+  function timeAgo(dateString: string): string {
+    const now = new Date();
+    const then = new Date(dateString);
+    const diff = Math.floor((now.getTime() - then.getTime()) / 1000);
+    if (diff < 60) return `${diff}s ago`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return then.toLocaleDateString();
+  }
+
+  // Load notifications from dangerDetections in localStorage
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('notifications');
-      if (stored) {
-        setNotifications(JSON.parse(stored));
+      const dangerDetections = localStorage.getItem('dangerDetections');
+      if (dangerDetections) {
+        const parsed = JSON.parse(dangerDetections);
+        const hazardNotifications = parsed.map((h: any, idx: number) => {
+          let message = h.severity === 'Critical'
+            ? `Critical hazard detected in ${h.cameraName || 'Unknown'}`
+            : `New hazard detected in ${h.cameraName || 'Unknown'}`;
+          return {
+            id: h.id || idx,
+            message,
+            time: h.timestamp ? timeAgo(h.timestamp) : '',
+            read: false,
+          };
+        });
+        // If notifications already exist in localStorage, preserve their read/delete state
+        const stored = localStorage.getItem('notifications');
+        if (stored) {
+          // Merge read/delete state
+          const storedArr = JSON.parse(stored);
+          const merged = hazardNotifications.map((notif: Notification) => {
+            const found = storedArr.find((n: Notification) => n.id === notif.id);
+            return found ? { ...notif, read: found.read } : notif;
+          });
+          setNotifications(merged);
+          localStorage.setItem('notifications', JSON.stringify(merged));
+        } else {
+          setNotifications(hazardNotifications);
+          localStorage.setItem('notifications', JSON.stringify(hazardNotifications));
+        }
+      } else {
+        setNotifications([]);
+        localStorage.setItem('notifications', JSON.stringify([]));
       }
     } catch {
-      setNotifications(notificationData);
+      setNotifications([]);
+      localStorage.setItem('notifications', JSON.stringify([]));
     }
   }, []);
 
