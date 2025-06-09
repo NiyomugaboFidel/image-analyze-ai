@@ -276,9 +276,9 @@ const Home: React.FC = () => {
             <div className="col-span-2">
               <div className="flex items-center">
                 <div className="w-8 h-8 rounded bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold">
-                  V
+                  A
                 </div>
-                <span className="ml-2 text-xl font-bold">Vicky AI</span>
+                <span className="ml-2 text-xl font-bold">Victoria AI</span>
               </div>
               <p className="mt-4 text-gray-400 max-w-xs">
                 Empowering construction teams with cutting-edge AI safety tools and solutions to create safer work environments.

@@ -78,7 +78,7 @@ const handleGoogleLogin = () => {
                 <div className="flex-grow border-t border-zinc-300 dark:border-zinc-700"></div>
               </div>
               <Button
-                onClick={() => window.location.href = "http://localhost:5000/auth/google"}
+                // onClick={() => window.location.href = "http://localhost:5000/auth/google"}
                 variant="outline"
                 className="w-full py-3 text-[16px] md:text-[18px] rounded-xl border border-input dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-foreground dark:text-zinc-100 font-medium flex items-center justify-center gap-2 md:gap-5 shadow transition-all duration-200"
                 type="button"

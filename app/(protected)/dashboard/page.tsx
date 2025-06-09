@@ -174,7 +174,7 @@ const ConstructionMonitoringDashboard: React.FC = () => {
       {/* Header */}
       <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 p-4 shadow-sm">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">Construction Site Safety Monitoring</h1>
+          <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">Construction Safety Monitoring System</h1>
           
           <div className="flex items-center space-x-4">
             {/* Notification Bell */}
